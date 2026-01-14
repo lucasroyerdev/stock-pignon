@@ -15,7 +15,7 @@ Application Android (4.2+) de gestion de stock et d'aide à la vente à prix lib
 - L'application devrait fonctionner sur une tablette similaire : Android 4.2 ou supérieur + écran équivalent (10.1" - 1280 x 800). Cela n'a cependant pas encore été testé.
 
 ## 📱 Utilisation
-1. Télécharger l'APK sur la tablette et installer.
+1. [Télécharger l'APK](https://github.com/lucasroyerdev/stock-pignon/releases/tag/v0.1.0) sur la tablette et installer.
 2. À la première utilisation, un dossier contenant un dossier d'exemple `stock_pignon` est créé dans la mémoire interne.
 3. Si vous souhaitez modifier les objets présentés, vous pouvez modifier `stock_pignon/pieces.json` ainsi que les images dans le dossier `stock_pignon/images`.
 4. Après la validation du premier panier, un fichier `stock_pignon/stock.json` sera créé afin de comptabiliser les pièces emportées.

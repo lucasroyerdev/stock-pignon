@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--  partial_panier.xml -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/cartContainer"
+    android:layout_width="350dp"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#DDDDDD"
+    android:padding="10dp"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/cart_name"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:paddingBottom="10dp"
+        android:textColor="#333333"/>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fadeScrollbars="false">
+
+        <LinearLayout
+            android:id="@+id/cartList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+    </ScrollView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="#E0E0E0"
+        android:padding="10dp">
+
+        <TextView
+            android:id="@+id/totalView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:text="Total: 0 - 0 €"
+            android:textStyle="bold"
+            android:textSize="24sp"
+            android:gravity="center"
+            android:paddingBottom="10dp"
+            android:textColor="#000000"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="2">
+
+            <Button
+                android:id="@+id/clearCartBtn"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="60dp"
+                android:text="@string/cart_empty_btn"
+                android:textSize="18sp"
+                android:textColor="#FFFFFF"
+                android:background="#E53935"
+                android:layout_marginEnd="5dp"
+                android:onClick="emptyCart"/>
+
+            <Button
+                android:id="@+id/validateCartBtn"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="60dp"
+                android:text="@string/cart_validate_btn"
+                android:textSize="18sp"
+                android:textColor="#FFFFFF"
+                android:background="#43A047"
+                android:layout_marginStart="5dp"
+                android:onClick="validateCart"/>
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

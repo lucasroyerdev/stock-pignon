@@ -1,0 +1,27 @@
+# Build Android
+.gradle/
+build/
+app/build/
+app/.gradle/
+captures/
+
+# Output Android
+**/release/*.apk
+**/debug/*.apk
+app/release/
+
+# Android Studio / VS Code
+.idea/
+*.iml
+.vscode/
+local.properties
+
+# System files and logs
+*.log
+.DS_Store
+Thumbs.db
+
+# Others
+*.bak
+*.swp
+*~

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--  item_piece.xml -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="0dp"
+    android:background="#FFFFFF"
+    android:padding="5dp"
+    android:gravity="center"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <ImageView
+        android:id="@+id/itemImage"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:scaleType="centerCrop"
+        android:src="@mipmap/ic_launcher" />
+
+    <TextView
+        android:id="@+id/itemName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="Item name"
+        android:textSize="20sp"
+        android:layout_marginTop="0dp"
+        android:lines="1"
+        android:ellipsize="end" />
+
+    <TextView
+        android:id="@+id/itemPrice"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="Price"
+        android:textSize="20sp" />
+
+    <!-- Quantity layout -->
+    <LinearLayout
+        android:id="@+id/qtyLayout"
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="0dp"
+        android:gravity="center">
+
+        <Button
+            android:id="@+id/minusBtn"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:text="-"
+            android:textSize="24sp" />
+
+        <TextView
+            android:id="@+id/qtyView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1"
+            android:textSize="22sp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:gravity="center"
+            android:focusable="false"
+            android:focusableInTouchMode="false" />
+
+        <Button
+            android:id="@+id/plusBtn"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:text="+"
+            android:textSize="24sp" />
+    </LinearLayout>
+</LinearLayout>

@@ -1,3 +1,4 @@
+// MainActivity.java
 package com.stock.pignon;
 
 import android.graphics.Color;
@@ -31,13 +32,16 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
 
-    // UI Components
+    // UI components
     private LinearLayout cartList;
     private LinearLayout homeLayout;
     private LinearLayout categoryItemsLayout;
     private LinearLayout categoriesLayout;
     private GridLayout gridPieces;
     private ImageView mainImage;
+
+    // Server component
+    private ControlServer server;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,6 +78,45 @@ public class MainActivity extends AppCompatActivity {
 
         // Initial cart visual sync
         CartViewHelper.updateCartView(cartList, this);
+
+        // Action bar
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+            getSupportActionBar().setTitle(" 🚲 Atelier du Pignon - Gestion du stock à prix libre");
+        }
+
+        // Launch server
+        server = new ControlServer(8080);
+        try {
+            server.start();
+            String url = "http://" + getDeviceIP() + ":8080";
+
+            // On met l'URL directement dans le sous-titre de l'ActionBar
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setSubtitle("🟢 Serveur actif : " + url);
+            }
+            Log.i(TAG, "Serveur démarré sur : " + url);
+        } catch (IOException e) {
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setSubtitle("🔴 Erreur serveur : Port 8080 occupé");
+            }
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Ensure cart is up to date if returning to the activity
+        CartViewHelper.updateCartView(cartList, this);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (server != null) {
+            server.stop();
+            Log.i(TAG, "Serveur arrêté.");
+        }
     }
 
     /**
@@ -239,13 +282,6 @@ public class MainActivity extends AppCompatActivity {
         return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, getResources().getDisplayMetrics());
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        // Ensure cart is up to date if returning to the activity
-        CartViewHelper.updateCartView(cartList, this);
-    }
-
     private void copyAssetsIfEmpty() {
         File folder = new File(Environment.getExternalStorageDirectory(), Config.EXTERNAL_DIR_NAME);
 
@@ -300,5 +336,27 @@ public class MainActivity extends AppCompatActivity {
         } catch (IOException e) {
             Log.e("MainActivity", "Erreur copie asset: " + assetName, e);
         }
+    }
+
+    /**
+     * Get device IP to print it to users for easy remote control
+     */
+    private String getDeviceIP() {
+        try {
+            java.util.Enumeration<java.net.NetworkInterface> interfaces = java.net.NetworkInterface.getNetworkInterfaces();
+            while (interfaces.hasMoreElements()) {
+                java.net.NetworkInterface iface = interfaces.nextElement();
+                java.util.Enumeration<java.net.InetAddress> addresses = iface.getInetAddresses();
+                while (addresses.hasMoreElements()) {
+                    java.net.InetAddress addr = addresses.nextElement();
+                    if (!addr.isLoopbackAddress() && addr instanceof java.net.Inet4Address) {
+                        return addr.getHostAddress();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Erreur IP", e);
+        }
+        return "127.0.0.1";
     }
 }

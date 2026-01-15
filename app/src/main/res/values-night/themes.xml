@@ -2,9 +2,9 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
     <style name="Theme.Pignon" parent="Theme.AppCompat.Light.DarkActionBar">
-        <item name="colorPrimary">@color/purple_500</item>
-        <item name="colorPrimaryDark">@color/purple_700</item>
-        <item name="colorAccent">@color/teal_200</item>
+        <item name="colorPrimary">@color/pignon_blue</item>
+        <item name="colorPrimaryDark">@color/pignon_blue_dark</item>
+        <item name="colorAccent">@color/pignon_blue</item>
     </style>
 
 </resources>

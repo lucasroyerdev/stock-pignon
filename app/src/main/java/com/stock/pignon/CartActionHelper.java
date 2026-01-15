@@ -12,7 +12,6 @@ import android.view.View;
 import android.widget.GridLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.ImageView;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -26,8 +25,6 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.bumptech.glide.Glide;
 
 /**
  * Action on shopping cart: validation, clearing, and persistence
@@ -122,7 +119,9 @@ public class CartActionHelper {
      * Merges current cart items with the existing stock file on the SD Card.
      */
     private static void saveCartToExternalFile(List<CartItem> cartItems) {
-        File stockFile = new File(Environment.getExternalStorageDirectory(), Config.STOCK_FILE_NAME);
+        File dir = new File(Environment.getExternalStorageDirectory(), Config.EXTERNAL_DIR_NAME);
+        File stockFile = new File(dir, Config.STOCK_FILE_NAME);
+
         Gson gson = new Gson();
         Map<String, Integer> stockMap;
 

@@ -2,6 +2,8 @@
 
 Application Android (4.2+) de gestion de stock et d'aide à la vente à prix libre. Conçue pour l'[**Atelier du Pignon**](https://www.atelierdupignon.fr/), atelier d'auto-réparation à Nantes.
 
+![Pignon1](https://github.com/user-attachments/assets/1e43e8f2-872c-41c2-9e12-405e41db5ca1)
+
 ## 🛠 Fonctionnalités
 - **Catalogue visuel** : Permet aux adhérent·es de noter rapidement les pièces qu'iels ont emportées.
 - **Prix libre & conscient** : Calculateur de panier affichant une fourchette de prix suggérée.
@@ -29,3 +31,9 @@ Application Android (4.2+) de gestion de stock et d'aide à la vente à prix lib
 
 Ce projet est sous licence **CC BY-NC-SA 4.0**.  
 Cela signifie que vous êtes libre de partager et d'adapter le code, tant que vous citez l'auteur original, que vous n'en faites pas un usage commercial, et que vous diffusez vos modifications sous la même licence.
+
+## 👀 Screenshots
+![Pignon2](https://github.com/user-attachments/assets/78439dff-cde4-4d75-8a8f-f6ee38a69abf)
+![Pignon3](https://github.com/user-attachments/assets/51694675-ec5f-4a59-95a9-7b7e0dd1caf3)
+![Pignon4](https://github.com/user-attachments/assets/f402250c-045c-4b3d-bbdc-11ae22bd62b2)
+

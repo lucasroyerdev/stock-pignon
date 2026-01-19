@@ -3,7 +3,6 @@ package com.stock.pignon;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Handler;
 import android.os.Environment;
 import android.text.Html;
@@ -111,8 +110,8 @@ public class CartActionHelper {
      */
     private static void saveCartToExternalFile(List<CartItem> cartItems) {
         File dir = new File(Environment.getExternalStorageDirectory(), Config.EXTERNAL_DIR_NAME);
-        File stockFile = new File(dir, Config.OUPUT_JSON_NAME);
-        File csvFile = new File(dir, Config.OUPUT_CSV_NAME);
+        File stockFile = new File(dir, Config.OUTPUT_JSON_NAME);
+        File csvFile = new File(dir, Config.OUTPUT_CSV_NAME);
 
         String today = DateHelper.getTodayIso();
         Gson gson = new Gson();

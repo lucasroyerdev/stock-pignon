@@ -42,16 +42,16 @@ public class ControlServer extends NanoHTTPD {
                 return downloadFile(Config.INPUT_JSON_NAME);
 
             case "/output_json":
-                return viewFile(Config.OUPUT_JSON_NAME);
+                return viewFile(Config.OUTPUT_JSON_NAME);
 
             case "/download_output_json":
-                return downloadFile(Config.OUPUT_JSON_NAME);
+                return downloadFile(Config.OUTPUT_JSON_NAME);
 
             case "/output_csv":
-                return viewFile(Config.OUPUT_CSV_NAME);
+                return viewFile(Config.OUTPUT_CSV_NAME);
 
             case "/download_output_csv":
-                return downloadFile(Config.OUPUT_CSV_NAME);
+                return downloadFile(Config.OUTPUT_CSV_NAME);
 
             case "/":
             case "/index.html":

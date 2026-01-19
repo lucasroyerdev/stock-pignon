@@ -3,6 +3,7 @@
 
     <string name="cart_name">Mes sacoches</string>
     <string name="cart_validate_btn">Valider</string>
+    <string name="cart_back_btn">Retour</string>
     <string name="cart_empty_btn">Vider</string>
     <string name="cart_empty">C\'est vide !</string>
     <string name="cart_item">Quantité : %1$d (%2$d - %3$d €)</string>

@@ -12,8 +12,8 @@ public class Config {
     public static final String INPUT_JSON_NAME = "pieces.json";
 
     // Output json
-    public static final String OUPUT_JSON_NAME = "stock.json";
+    public static final String OUTPUT_JSON_NAME = "stock.json";
 
     // Output json
-    public static final String OUPUT_CSV_NAME = "stock.csv";
+    public static final String OUTPUT_CSV_NAME = "stock.csv";
 }

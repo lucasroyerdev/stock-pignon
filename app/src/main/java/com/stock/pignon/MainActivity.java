@@ -61,12 +61,6 @@ public class MainActivity extends AppCompatActivity {
         gridPieces = findViewById(R.id.gridPieces);
         mainImage = findViewById(R.id.mainImage);
 
-        // Setup Back Button
-        Button backBtn = findViewById(R.id.backToHomeBtn);
-        if (backBtn != null) {
-            backBtn.setOnClickListener(v -> showHome());
-        }
-
         // Copy assets to sd card if not founded
         copyAssetsIfEmpty();
         // Get data from sd card
@@ -86,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // Get app version
-        String versionName = "";
+        String versionName;
         try {
             versionName = "App v" + getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
         } catch (Exception e) {
@@ -200,6 +194,8 @@ public class MainActivity extends AppCompatActivity {
         homeLayout.setVisibility(View.GONE);
         categoryItemsLayout.setVisibility(View.VISIBLE);
 
+        updateActionButton(false);
+
         gridPieces.removeAllViews();
 
         // Calculate item width for a 4-column grid
@@ -269,6 +265,8 @@ public class MainActivity extends AppCompatActivity {
     public void showHome() {
         categoryItemsLayout.setVisibility(View.GONE);
         homeLayout.setVisibility(View.VISIBLE);
+
+        updateActionButton(true);
     }
 
     private void loadMainImage() {
@@ -282,6 +280,23 @@ public class MainActivity extends AppCompatActivity {
 
     public void validateCart(View view) {
         CartActionHelper.validateCart(cartList, this);
+    }
+
+    public void updateActionButton(boolean isHome) {
+        Button btn = findViewById(R.id.validateCartBtn);
+        if (btn == null) return;
+
+        if (isHome) {
+            // Home mode : validate button
+            btn.setText(getString(R.string.cart_validate_btn));
+            btn.setBackgroundColor(Color.parseColor("#43A047")); // Vert
+            btn.setOnClickListener(v -> validateCart(v));
+        } else {
+            // Category mode : back button
+            btn.setText(getString(R.string.cart_back_btn));
+            btn.setBackgroundColor(Color.parseColor("#1E88E5")); // Bleu
+            btn.setOnClickListener(v -> showHome());
+        }
     }
 
     private int dpToPx(int dp) {
@@ -309,8 +324,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // Check stock.json and stock.csv output files to avoid control server error
-        checkOrCreateEmptyFile(new File(rootDir, Config.OUPUT_JSON_NAME), "[]");
-        checkOrCreateEmptyFile(new File(rootDir, Config.OUPUT_CSV_NAME), "");
+        checkOrCreateEmptyFile(new File(rootDir, Config.OUTPUT_JSON_NAME), "[]");
+        checkOrCreateEmptyFile(new File(rootDir, Config.OUTPUT_CSV_NAME), "");
 
         // Check images folder
         File imgDir = new File(rootDir, Config.IMAGES_SUBDIR_NAME);

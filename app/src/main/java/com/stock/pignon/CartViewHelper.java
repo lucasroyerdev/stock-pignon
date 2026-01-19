@@ -22,17 +22,23 @@ import java.util.List;
 public class CartViewHelper {
 
     /**
-     * Refreshes the entire cart side-panel or list
-     * Clears everything and rebuild on current CartManager data
+     * Short version for app resume : update without changing validate/back button state
      */
     public static void updateCartView(LinearLayout cartList, Context context) {
+        updateCartView(cartList, context, false, false);
+    }
+
+    /**
+     * Full version with validate/back button management
+     */
+    public static void updateCartView(LinearLayout cartList, Context context, boolean updateButton, boolean isHome) {
         if (cartList == null) return;
 
-        // Clear and get current items
+        // Clean item lists
         cartList.removeAllViews();
         List<CartItem> cartItems = CartManager.getItems();
 
-        // If empty cart, show it to user
+        // Manage empty cart
         if (cartItems.isEmpty()) {
             TextView empty = new TextView(context);
             empty.setText(context.getString(R.string.cart_empty));
@@ -40,35 +46,24 @@ public class CartViewHelper {
             empty.setGravity(Gravity.CENTER);
             empty.setPadding(0, 50, 0, 0);
             cartList.addView(empty);
-
             updateTotalDisplay(context, 0, 0);
-            return;
+        } else {
+            // Create list if not empty
+            int totalMin = 0;
+            int totalMax = 0;
+            for (CartItem item : cartItems) {
+                totalMin += item.getTotalMin();
+                totalMax += item.getTotalMax();
+
+                // Create a line for each item
+                cartList.addView(createCartItemView(item, cartList, context));
+            }
+            updateTotalDisplay(context, totalMin, totalMax);
         }
 
-        // Build list and calculate total at the same time
-        int totalMin = 0;
-        int totalMax = 0;
-
-        for (CartItem item : cartItems) {
-            totalMin += item.getTotalMin();
-            totalMax += item.getTotalMax();
-
-            // Create and add the row view
-            cartList.addView(createCartItemView(item, cartList, context));
-        }
-
-        // Display global price range at the end
-        updateTotalDisplay(context, totalMin, totalMax);
-    }
-
-    /**
-     * Updates the global price range at the bottom of the screen
-     */
-    private static void updateTotalDisplay(Context context, int min, int max) {
-        TextView totalView = ((Activity) context).findViewById(R.id.totalView);
-        if (totalView != null) {
-            // Using string resources
-            totalView.setText(context.getString(R.string.price_range, min, max, "€"));
+        // Update validate/back button
+        if (updateButton && context instanceof MainActivity) {
+            ((MainActivity) context).updateActionButton(isHome);
         }
     }
 
@@ -81,7 +76,6 @@ public class CartViewHelper {
         row.setOrientation(LinearLayout.HORIZONTAL);
         row.setGravity(Gravity.CENTER_VERTICAL);
 
-        // Layout parameters
         LinearLayout.LayoutParams rowParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -90,13 +84,13 @@ public class CartViewHelper {
 
         // Image
         ImageView image = new ImageView(context);
-        ImageLoader.loadImage(image, item.getImageFile(),200,200);
+        ImageLoader.loadImage(image, item.getImageFile(), 200, 200);
         LinearLayout.LayoutParams imgParams = new LinearLayout.LayoutParams(100, 100);
         imgParams.setMargins(0, 0, 20, 0);
         image.setLayoutParams(imgParams);
         row.addView(image);
 
-        // Sublayout for name + [quantity + price]
+        // Sublayout infos
         LinearLayout infoLayout = new LinearLayout(context);
         infoLayout.setOrientation(LinearLayout.VERTICAL);
         infoLayout.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
@@ -108,7 +102,7 @@ public class CartViewHelper {
         nameView.setTypeface(null, Typeface.BOLD);
         infoLayout.addView(nameView);
 
-        // Quantity and price range
+        // Quantity / price
         TextView detailsView = new TextView(context);
         String details = context.getString(R.string.cart_item, item.getQuantity(), item.getTotalMin(), item.getTotalMax());
         detailsView.setText(details);
@@ -124,42 +118,35 @@ public class CartViewHelper {
     }
 
     /**
-     * Creates the delete button
-     */
+     * Creates the delete button for each item
+    */
     private static Button createRemoveButton(CartItem item, LinearLayout cartList, Context context) {
         Button btn = new Button(context);
         btn.setText("✖");
-        btn.setTextSize(18);
         btn.setTextColor(Color.WHITE);
-        btn.setGravity(Gravity.CENTER);
-
-        // Conversion DP to PX for consistent size on all screens
         float scale = context.getResources().getDisplayMetrics().density;
         int sizePx = (int) (48 * scale + 0.5f);
+        btn.setLayoutParams(new LinearLayout.LayoutParams(sizePx, sizePx));
 
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(sizePx, sizePx);
-        btn.setLayoutParams(params);
-
-        // Background: grey rounded rectangle (API 17 fallback)
         GradientDrawable shape = new GradientDrawable();
-        shape.setColor(Color.parseColor("#E53935")); // Reddish to indicate delete
+        shape.setColor(Color.parseColor("#E53935"));
         shape.setCornerRadius(4 * scale);
         btn.setBackground(shape);
 
         btn.setOnClickListener(v -> {
-            // setting quantity to 0 removes the item
-            CartManager.addOrUpdateItem(
-                    item.getName(),
-                    item.getMinPrice(),
-                    item.getMaxPrice(),
-                    0, // Setting quantity to 0 triggers removal
-                    item.getImageFile()
-            );
-
-            // visual refresh of the cart list
+            CartManager.addOrUpdateItem(item.getName(), item.getMinPrice(), item.getMaxPrice(), 0, item.getImageFile());
             updateCartView(cartList, context);
         });
-
         return btn;
+    }
+
+    /**
+     * Manage price range for whole cart
+     */
+    private static void updateTotalDisplay(Context context, int min, int max) {
+        TextView totalView = ((Activity) context).findViewById(R.id.totalView);
+        if (totalView != null) {
+            totalView.setText(context.getString(R.string.price_range, min, max, "€"));
+        }
     }
 }

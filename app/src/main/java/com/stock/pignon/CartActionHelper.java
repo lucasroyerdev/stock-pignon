@@ -183,16 +183,17 @@ public class CartActionHelper {
                 .create();
         merciDialog.show();
 
-
         new Handler().postDelayed(() -> {
             // Close dialog
             merciDialog.dismiss();
-            // Go to home if not already
-            if (!(activity instanceof MainActivity)) {
-                Intent intent = new Intent(activity, MainActivity.class);
+
+            if (activity instanceof MainActivity) {
+                MainActivity main = (MainActivity) activity;
+                // Go to home if not already
+                main.showHome();
                 // Clear the backstack so the user can't "go back" to a validated cart
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                activity.startActivity(intent);
+                GridLayout grid = main.findViewById(R.id.gridPieces);
+                refreshGridQuantities(grid);
             }
         }, 2000);
     }

@@ -4,7 +4,7 @@
     <string name="cart_name">Mes sacoches</string>
     <string name="cart_validate_btn">Valider</string>
     <string name="cart_empty_btn">Vider</string>
-    <string name="cart_empty">Sacoches vides</string>
+    <string name="cart_empty">C\'est vide !</string>
     <string name="cart_item">Quantité : %1$d (%2$d - %3$d €)</string>
 
     <string name="currency">€</string>
@@ -13,6 +13,6 @@
     <string name="popup_name">Mes sacoches</string>
     <string name="popup_item"><![CDATA[<b>%1$d x %2$s</b> : %3$d - %4$d €<br>]]></string>
     <string name="popup_total"><![CDATA[<br><b>Contribution consciente dans la petite boîte : %1$d - %2$d €</b>]]></string>
-    <string name="popup_end">Sacoches sauvegardées, merci !</string>
+    <string name="popup_end">Sacoches sauvegardées, merci ! ❤️</string>
 
 </resources>

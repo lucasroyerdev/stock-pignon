@@ -85,6 +85,14 @@ public class MainActivity extends AppCompatActivity {
             getSupportActionBar().setTitle(" 🚲 Atelier du Pignon - Gestion du stock à prix libre");
         }
 
+        // Get app version
+        String versionName = "";
+        try {
+            versionName = "App v" + getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+        } catch (Exception e) {
+            versionName = ""; // Fallback
+        }
+
         // Launch server
         server = new ControlServer(8080);
         try {
@@ -93,12 +101,12 @@ public class MainActivity extends AppCompatActivity {
 
             // On met l'URL directement dans le sous-titre de l'ActionBar
             if (getSupportActionBar() != null) {
-                getSupportActionBar().setSubtitle("🟢 Server online : " + url);
+                getSupportActionBar().setSubtitle("Serveur en ligne : " + url + " - " + versionName);
             }
             Log.i(TAG, "Server started on : " + url);
         } catch (IOException e) {
             if (getSupportActionBar() != null) {
-                getSupportActionBar().setSubtitle("🔴 Server error : port 8080 busy");
+                getSupportActionBar().setSubtitle("Erreur serveur" + " - " + versionName);
             }
         }
     }
@@ -258,7 +266,7 @@ public class MainActivity extends AppCompatActivity {
         CartViewHelper.updateCartView(cartList, this);
     }
 
-    private void showHome() {
+    public void showHome() {
         categoryItemsLayout.setVisibility(View.GONE);
         homeLayout.setVisibility(View.VISIBLE);
     }

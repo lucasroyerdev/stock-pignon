@@ -93,12 +93,12 @@ public class MainActivity extends AppCompatActivity {
 
             // On met l'URL directement dans le sous-titre de l'ActionBar
             if (getSupportActionBar() != null) {
-                getSupportActionBar().setSubtitle("🟢 Serveur actif : " + url);
+                getSupportActionBar().setSubtitle("🟢 Server online : " + url);
             }
-            Log.i(TAG, "Serveur démarré sur : " + url);
+            Log.i(TAG, "Server started on : " + url);
         } catch (IOException e) {
             if (getSupportActionBar() != null) {
-                getSupportActionBar().setSubtitle("🔴 Erreur serveur : Port 8080 occupé");
+                getSupportActionBar().setSubtitle("🔴 Server error : port 8080 busy");
             }
         }
     }
@@ -115,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
         if (server != null) {
             server.stop();
-            Log.i(TAG, "Serveur arrêté.");
+            Log.i(TAG, "Server stopped.");
         }
     }
 
@@ -268,8 +268,6 @@ public class MainActivity extends AppCompatActivity {
         ImageLoader.loadImage(mainImage, "_velo", 800,800);
     }
 
-    // --- Button Actions (linked via android:onClick in XML) ---
-
     public void emptyCart(View view) {
         CartActionHelper.emptyCart(cartList, this);
     }
@@ -283,24 +281,65 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void copyAssetsIfEmpty() {
-        File folder = new File(Environment.getExternalStorageDirectory(), Config.EXTERNAL_DIR_NAME);
+        File rootDir = new File(Environment.getExternalStorageDirectory(), Config.EXTERNAL_DIR_NAME);
 
-        // First safety : is folder already in sdcard ?
-        if (!folder.exists()) {
-            // Second safety : are we able to create folder ?
-            if (folder.mkdirs()) {
-                // Copy JSON file
-                copyFileFromAssets(Config.INPUT_JSON_NAME, new File(folder, Config.INPUT_JSON_NAME));
+        // Create root folder if not found
+        if (!rootDir.exists()) {
+            if (!rootDir.mkdirs()) {
+                Log.e("MainActivity", "Can't create root dir." + rootDir.getAbsolutePath());
+                return;
+            }
+        }
 
-                // Copy images subfolder
-                File imgFolder = new File(folder, Config.IMAGES_SUBDIR_NAME);
-                if (imgFolder.mkdirs()) {
-                    copyFolderFromAssets(Config.IMAGES_SUBDIR_NAME, imgFolder);
-                }
+        // Check pieces.json
+        File inputJson = new File(rootDir, Config.INPUT_JSON_NAME);
+        if (!inputJson.exists()) {
+            Log.i("MainActivity", "pieces.json not found, copying it...");
+            copyFileFromAssets(Config.INPUT_JSON_NAME, inputJson);
+        } else {
+            Log.d("MainActivity", "Keep existing pieces.json");
+        }
+
+        // Check stock.json and stock.csv output files to avoid control server error
+        checkOrCreateEmptyFile(new File(rootDir, Config.OUPUT_JSON_NAME), "[]");
+        checkOrCreateEmptyFile(new File(rootDir, Config.OUPUT_CSV_NAME), "");
+
+        // Check images folder
+        File imgDir = new File(rootDir, Config.IMAGES_SUBDIR_NAME);
+        if (!imgDir.exists()) {
+            if (!imgDir.mkdirs()) {
+                Log.e("MainActivity", "Can't create images dir.");
+                return;
+            }
+        }
+
+        // Copy images only if not found
+        String[] filesInImgDir = imgDir.list();
+        if (filesInImgDir == null || filesInImgDir.length == 0) {
+            Log.i("MainActivity", "Images folder empty. Installing images...");
+            copyFolderFromAssets(Config.IMAGES_SUBDIR_NAME, imgDir);
+        } else {
+            Log.d("MainActivity", "Keep existing images.");
+        }
+    }
+
+    /**
+     * Create a file with default content if not found
+     */
+    private void checkOrCreateEmptyFile(File file, String defaultContent) {
+        if (!file.exists()) {
+            try (FileOutputStream fos = new FileOutputStream(file)) {
+                fos.write(defaultContent.getBytes());
+                Log.d(TAG, "Initialisation de : " + file.getName());
+            } catch (IOException e) {
+                Log.e(TAG, "Erreur lors de l'initialisation de " + file.getName(), e);
             }
         }
     }
 
+    /**
+     * Copy folder from assets
+     */
     private void copyFolderFromAssets(String assetDirName, File destDir) {
         try {
             String[] files = getAssets().list(assetDirName);
@@ -316,25 +355,28 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         } catch (IOException e) {
-            Log.e("MainActivity", "Erreur listing assets: " + assetDirName, e);
+            Log.e("MainActivity", "Listing assets error: " + assetDirName, e);
         }
     }
 
+    /**
+     * Copy file from assets
+     */
     private void copyFileFromAssets(String assetName, File destFile) {
         // Optimized read
         // Try-with-resources ensures streams are automatically closed, avoid memory leaks
         try (InputStream in = getAssets().open(assetName);
              OutputStream out = new FileOutputStream(destFile)) {
 
-            byte[] buffer = new byte[1024];
+            byte[] buffer = new byte[8192];
             int read;
             while ((read = in.read(buffer)) != -1) {
                 out.write(buffer, 0, read);
             }
-            Log.d("MainActivity", "Succès : " + assetName + " copié.");
+            Log.d("MainActivity", "Success : " + assetName + " copied.");
 
         } catch (IOException e) {
-            Log.e("MainActivity", "Erreur copie asset: " + assetName, e);
+            Log.e("MainActivity", "Can't copy asset: " + assetName, e);
         }
     }
 
@@ -355,7 +397,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         } catch (Exception e) {
-            Log.e(TAG, "Erreur IP", e);
+            Log.e(TAG, "IP error", e);
         }
         return "127.0.0.1";
     }

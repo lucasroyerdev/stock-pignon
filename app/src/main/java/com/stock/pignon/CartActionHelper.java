@@ -22,9 +22,8 @@ import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.lang.reflect.Type;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Action on shopping cart: validation, clearing, and persistence
@@ -32,6 +31,21 @@ import java.util.Map;
 public class CartActionHelper {
 
     private static final String TAG = "CartActionHelper";
+
+    /**
+     * Data structure for JSON and CSV
+     */
+    private static class StockEntry {
+        String date;
+        String name;
+        int qty;
+
+        StockEntry(String date, String name, int qty) {
+            this.date = date;
+            this.name = name;
+            this.qty = qty;
+        }
+    }
 
     /**
      * Resets the cart data and refreshes UI
@@ -90,6 +104,74 @@ public class CartActionHelper {
                 .show();
     }
 
+
+
+    /**
+     * Merges current cart items with the existing stock file (json and csv) on the SD Card.
+     */
+    private static void saveCartToExternalFile(List<CartItem> cartItems) {
+        File dir = new File(Environment.getExternalStorageDirectory(), Config.EXTERNAL_DIR_NAME);
+        File stockFile = new File(dir, Config.OUPUT_JSON_NAME);
+        File csvFile = new File(dir, Config.OUPUT_CSV_NAME);
+
+        String today = DateHelper.getTodayIso();
+        Gson gson = new Gson();
+
+        // Load previous list
+        List<StockEntry> history = loadHistory(stockFile, gson);
+
+        // Merge current cart items in previous list
+        for (CartItem cartItem : cartItems) {
+            boolean merged = false;
+            for (StockEntry entry : history) {
+                // Same date same name ? Add it
+                if (entry.date.equals(today) && entry.name.equals(cartItem.getName())) {
+                    entry.qty += cartItem.getQuantity();
+                    merged = true;
+                    break;
+                }
+            }
+            // Not found on the same date ? Create it
+            if (!merged) {
+                history.add(new StockEntry(today, cartItem.getName(), cartItem.getQuantity()));
+            }
+        }
+        // Save to JSON
+        try (FileOutputStream fos = new FileOutputStream(stockFile);
+             OutputStreamWriter writer = new OutputStreamWriter(fos, "UTF-8")) {
+            gson.newBuilder().setPrettyPrinting().create().toJson(history, writer);
+        } catch (Exception e) {
+            Log.e(TAG, "Error writing JSON", e);
+        }
+
+        // Save to CSV, french format with ";"
+        try (FileOutputStream fos = new FileOutputStream(csvFile);
+             OutputStreamWriter writer = new OutputStreamWriter(fos, "UTF-8")) {
+            writer.write('\ufeff');
+            writer.write("Date;Article;Quantité\n");
+            for (StockEntry entry : history) {
+                writer.write(entry.date + ";" + entry.name.replace(";", ",") + ";" + entry.qty + "\n");
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error writing CSV", e);
+        }
+    }
+
+    /**
+     * Load JSON history
+     */
+    private static List<StockEntry> loadHistory(File file, Gson gson) {
+        if (!file.exists()) return new ArrayList<>();
+        try (InputStreamReader reader = new InputStreamReader(new FileInputStream(file), "UTF-8")) {
+            Type type = new TypeToken<List<StockEntry>>(){}.getType();
+            List<StockEntry> result = gson.fromJson(reader, type);
+            return (result != null) ? result : new ArrayList<>();
+        } catch (Exception e) {
+            Log.e(TAG, "Error reading json history", e);
+            return new ArrayList<>();
+        }
+    }
+
     /**
      * Displays a thank you popup and returns to the main menu after 2 seconds.
      */
@@ -113,73 +195,6 @@ public class CartActionHelper {
                 activity.startActivity(intent);
             }
         }, 2000);
-    }
-
-    /**
-     * Merges current cart items with the existing stock file (json and csv) on the SD Card.
-     */
-    private static void saveCartToExternalFile(List<CartItem> cartItems) {
-        File dir = new File(Environment.getExternalStorageDirectory(), Config.EXTERNAL_DIR_NAME);
-        File stockFile = new File(dir, Config.OUPUT_JSON_NAME);
-        File csvFile = new File(dir, Config.OUPUT_CSV_NAME);
-
-        Gson gson = new Gson();
-        // Load previous list
-        Map<String, Integer> stockMap = loadExistingStock(stockFile, gson);
-
-        // Add current cart item
-        for (CartItem item : cartItems) {
-            Integer qtyObj = stockMap.get(item.getName());
-            int currentQty = (qtyObj != null) ? qtyObj : 0;
-            stockMap.put(item.getName(), currentQty + item.getQuantity());
-        }
-
-        // Save to JSON
-        try (FileOutputStream fos = new FileOutputStream(stockFile);
-             OutputStreamWriter writer = new OutputStreamWriter(fos, "UTF-8")) {
-            gson.toJson(stockMap, writer);
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to write stock file", e);
-        }
-
-        // Save to CSV, french format with ";"
-        try (FileOutputStream fos = new FileOutputStream(csvFile);
-             OutputStreamWriter writer = new OutputStreamWriter(fos, "UTF-8")) {
-
-            // UTF-8 BOM and columns headers
-            writer.write('\ufeff');
-            writer.write("Article;Quantité\n");
-
-            for (Map.Entry<String, Integer> entry : stockMap.entrySet()) {
-                writer.write(entry.getKey().replace(";", ",") + ";" + entry.getValue() + "\n");
-            }
-            Log.i(TAG, "CSV Export updated successfully");
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to write CSV file", e);
-        }
-    }
-
-    /**
-     * Reads the current stock file. If the file is missing or corrupted, returns an empty map.
-     */
-    private static Map<String, Integer> loadExistingStock(File stockFile, Gson gson) {
-        if (!stockFile.exists()) return new HashMap<>();
-
-        try (FileInputStream fis = new FileInputStream(stockFile);
-             @SuppressWarnings("CharsetObjectCanBeUsed")
-             InputStreamReader reader = new InputStreamReader(fis, "UTF-8")) {
-
-            // Type definition for Map required by GSON : <String, Integer>
-            Type type = new TypeToken<Map<String, Integer>>(){}.getType();
-            // Read and fill map
-            Map<String, Integer> result = gson.fromJson(reader, type);
-
-            return (result != null) ? result : new HashMap<>();
-
-        } catch (Exception e) {
-            Log.e(TAG, "Error reading existing stock, starting fresh", e);
-            return new HashMap<>();
-        }
     }
 
     /**

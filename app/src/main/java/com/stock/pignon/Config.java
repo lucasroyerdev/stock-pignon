@@ -9,8 +9,11 @@ public class Config {
     public static final String IMAGES_SUBDIR_NAME = "images";
 
     // Input json
-    public static final String PIECES_FILE_NAME = "pieces.json";
+    public static final String INPUT_JSON_NAME = "pieces.json";
 
     // Output json
-    public static final String STOCK_FILE_NAME = "stock.json";
+    public static final String OUPUT_JSON_NAME = "stock.json";
+
+    // Output json
+    public static final String OUPUT_CSV_NAME = "stock.csv";
 }

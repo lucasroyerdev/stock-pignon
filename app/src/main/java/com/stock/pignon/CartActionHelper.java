@@ -116,39 +116,46 @@ public class CartActionHelper {
     }
 
     /**
-     * Merges current cart items with the existing stock file on the SD Card.
+     * Merges current cart items with the existing stock file (json and csv) on the SD Card.
      */
     private static void saveCartToExternalFile(List<CartItem> cartItems) {
         File dir = new File(Environment.getExternalStorageDirectory(), Config.EXTERNAL_DIR_NAME);
-        File stockFile = new File(dir, Config.STOCK_FILE_NAME);
+        File stockFile = new File(dir, Config.OUPUT_JSON_NAME);
+        File csvFile = new File(dir, Config.OUPUT_CSV_NAME);
 
         Gson gson = new Gson();
-        Map<String, Integer> stockMap;
+        // Load previous list
+        Map<String, Integer> stockMap = loadExistingStock(stockFile, gson);
 
-        // Load data into a Map (Key: Item Name, Value: Total Quantity)
-        stockMap = loadExistingStock(stockFile, gson);
-
-        // Merge with new items from current cart
+        // Add current cart item
         for (CartItem item : cartItems) {
-            // Get previous quantity
             Integer qtyObj = stockMap.get(item.getName());
             int currentQty = (qtyObj != null) ? qtyObj : 0;
-            // Add
             stockMap.put(item.getName(), currentQty + item.getQuantity());
         }
 
-        // Overwrite the file with updated data
-        // Needs WRITE_EXTERNAL_STORAGE permission
+        // Save to JSON
         try (FileOutputStream fos = new FileOutputStream(stockFile);
-             @SuppressWarnings("CharsetObjectCanBeUsed")
              OutputStreamWriter writer = new OutputStreamWriter(fos, "UTF-8")) {
-
-            // Writing directly to the stream
             gson.toJson(stockMap, writer);
-            Log.i(TAG, "Stock updated successfully at: " + stockFile.getAbsolutePath());
-
         } catch (Exception e) {
             Log.e(TAG, "Failed to write stock file", e);
+        }
+
+        // Save to CSV, french format with ";"
+        try (FileOutputStream fos = new FileOutputStream(csvFile);
+             OutputStreamWriter writer = new OutputStreamWriter(fos, "UTF-8")) {
+
+            // UTF-8 BOM and columns headers
+            writer.write('\ufeff');
+            writer.write("Article;Quantité\n");
+
+            for (Map.Entry<String, Integer> entry : stockMap.entrySet()) {
+                writer.write(entry.getKey().replace(";", ",") + ";" + entry.getValue() + "\n");
+            }
+            Log.i(TAG, "CSV Export updated successfully");
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to write CSV file", e);
         }
     }
 

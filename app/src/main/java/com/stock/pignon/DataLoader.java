@@ -13,7 +13,7 @@ import java.util.List;
 public class DataLoader {
     private static final String TAG = "DataLoader"; // For readable logs
     private static final String EXTERNAL_DIR = Config.EXTERNAL_DIR_NAME;
-    private static final String PIECES_FILE = Config.PIECES_FILE_NAME;
+    private static final String PIECES_FILE = Config.INPUT_JSON_NAME;
 
     // Raw data
     private static List<Category> cachedCategories = new ArrayList<>();

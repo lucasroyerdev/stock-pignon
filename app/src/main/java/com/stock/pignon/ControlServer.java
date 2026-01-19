@@ -37,12 +37,25 @@ public class ControlServer extends NanoHTTPD {
         // Get requested address
         String uri = session.getUri();
 
-        // Adapt URL to find the file : /stock.json become stock.json
-        if (uri.equals("/download_orders")) {
-            return downloadFile(Config.STOCK_FILE_NAME);
-        }
-        if (uri.equals("/download_json")) {
-            return downloadFile(Config.PIECES_FILE_NAME);
+        switch (uri) {
+            case "/download_input":
+                return downloadFile(Config.INPUT_JSON_NAME);
+
+            case "/output_json":
+                return viewFile(Config.OUPUT_JSON_NAME);
+
+            case "/download_output_json":
+                return downloadFile(Config.OUPUT_JSON_NAME);
+
+            case "/output_csv":
+                return viewFile(Config.OUPUT_CSV_NAME);
+
+            case "/download_output_csv":
+                return downloadFile(Config.OUPUT_CSV_NAME);
+
+            case "/":
+            case "/index.html":
+                return newFixedLengthResponse(getHtmlResponse());
         }
 
         // File upload management
@@ -54,8 +67,7 @@ public class ControlServer extends NanoHTTPD {
             }
         }
 
-        // Return UI
-        return newFixedLengthResponse(getHtmlResponse());
+        return newFixedLengthResponse(Response.Status.NOT_FOUND, MIME_PLAINTEXT, "❌ Page non trouvée");
     }
 
     /**
@@ -71,7 +83,7 @@ public class ControlServer extends NanoHTTPD {
                 "h1 { color: #0049AF; border-bottom: 2px solid #0049AF; }" +
                 "h2 { color: #555; margin-top: 30px; }" +
                 ".card { background: #f4f4f4; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ddd; }" +
-                ".btn { display: inline-block; width: 280px; height: 45px; line-height: 45px; text-align: center; background: #0049AF; color: white; text-decoration: none; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; box-sizing: border-box; padding: 0; -webkit-appearance: none; font-family: inherit; font-size: 14px; font-style: normal; letter-spacing: normal; }" +
+                ".btn { display: inline-block; width: 280px; height: 45px; line-height: 45px; text-align: center; background: #0049AF; color: white; text-decoration: none; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; box-sizing: border-box; padding: 0; -webkit-appearance: none; font-family: inherit; font-size: 14px; font-style: normal; letter-spacing: normal; margin: 10px 5px; vertical-align: middle;}" +
                 ".btn-download { background: #2E7D32; }" +
                 "input[type='file'] { margin: 10px 0; }" +
                 ".status { font-weight: bold; color: green; }" +
@@ -84,13 +96,16 @@ public class ControlServer extends NanoHTTPD {
                 "<div class='card'>" +
                 "<h3>Récupérer les sacoches des adhérent·es</h3>" +
                 "<p>Télécharger le décompte des pièces sorties de l'atelier.</p>" +
-                "<a href='/download_orders' class='btn'>Télécharger stock.json</a>" +
+                "<a href='/output_json' class='btn'>Voir stock.json</a>" +
+                "<a href='/output_csv' class='btn'>Voir stock.csv</a>" +
+                "<a href='/download_output_json' class='btn'>Télécharger stock.json</a>" +
+                "<a href='/download_output_csv' class='btn'>Télécharger stock.csv</a>" +
                 "</div>" +
 
                 "<h2>Modifier le catalogue</h2>" +
                 "<div class='card'>" +
                 "<h3>Gestion du fichier JSON</h3>" +
-                "<p>Catalogue actuel : <a href='/download_json' class='btn'>Télécharger pieces.json</a></p>" +
+                "<p>Catalogue actuel : <a href='/download_input' class='btn'>Télécharger pieces.json</a></p>" +
                 "<hr>" +
                 "<form action='/upload_json' method='post' enctype='multipart/form-data'>" +
                 "<p><strong>Envoyer un nouveau catalogue :</strong></p>" +
@@ -124,7 +139,7 @@ public class ControlServer extends NanoHTTPD {
             if (tmpPath == null) return newFixedLengthResponse("❌ Aucun fichier reçu.");
 
             File src = new File(tmpPath);
-            File dest = new File(baseDir, Config.PIECES_FILE_NAME);
+            File dest = new File(baseDir, Config.INPUT_JSON_NAME);
 
             copyFile(src, dest);
             return newFixedLengthResponse("✅ Catalogue mis à jour ! <a href='/'>Retour</a>");
@@ -179,20 +194,43 @@ public class ControlServer extends NanoHTTPD {
     }
 
     /**
-     * Prepare local file to send it to remote.
+     * Prepare file and offer as download
      */
     private Response downloadFile(String filename) {
         File file = new File(baseDir, filename);
         if (!file.exists()) {
-            return newFixedLengthResponse(Response.Status.NOT_FOUND, MIME_PLAINTEXT, "❌ Fichier non trouvé : " + filename);
+            return newFixedLengthResponse(Response.Status.NOT_FOUND, MIME_PLAINTEXT, "❌ Fichier non trouvé.");
         }
         try {
             InputStream is = new FileInputStream(file);
+
+            // Force download
             Response res = newChunkedResponse(Response.Status.OK, "application/octet-stream", is);
 
-            // Force file download name
             res.addHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
+            return res;
+        } catch (IOException e) {
+            return newFixedLengthResponse("❌ Erreur de lecture.");
+        }
+    }
 
+    /**
+     * Prepare file and print it in browser
+     */
+    private Response viewFile(String filename) {
+        File file = new File(baseDir, filename);
+        if (!file.exists()) {
+            return newFixedLengthResponse(Response.Status.NOT_FOUND, MIME_PLAINTEXT, "❌ Fichier non trouvé.");
+        }
+        try {
+            InputStream is = new FileInputStream(file);
+
+            // Force Mime type to print file inside browser
+            String mimeType = "text/plain";
+
+            Response res = newChunkedResponse(Response.Status.OK, mimeType + "; charset=utf-8", is);
+
+            res.addHeader("Content-Disposition", "inline");
             return res;
         } catch (IOException e) {
             return newFixedLengthResponse("❌ Erreur de lecture.");

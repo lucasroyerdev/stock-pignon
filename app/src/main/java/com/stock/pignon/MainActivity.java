@@ -290,7 +290,7 @@ public class MainActivity extends AppCompatActivity {
             // Second safety : are we able to create folder ?
             if (folder.mkdirs()) {
                 // Copy JSON file
-                copyFileFromAssets(Config.PIECES_FILE_NAME, new File(folder, Config.PIECES_FILE_NAME));
+                copyFileFromAssets(Config.INPUT_JSON_NAME, new File(folder, Config.INPUT_JSON_NAME));
 
                 // Copy images subfolder
                 File imgFolder = new File(folder, Config.IMAGES_SUBDIR_NAME);

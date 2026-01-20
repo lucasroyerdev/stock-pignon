@@ -12,6 +12,7 @@ import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.os.Environment;
 import java.io.File;
@@ -35,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
     // UI components
     private LinearLayout cartList;
     private LinearLayout homeLayout;
-    private LinearLayout categoryItemsLayout;
+    private FrameLayout categoryItemsLayout;
     private LinearLayout categoriesLayout;
     private GridLayout gridPieces;
     private ImageView mainImage;
@@ -93,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
             server.start();
             String url = "http://" + getDeviceIP() + ":8080";
 
-            // On met l'URL directement dans le sous-titre de l'ActionBar
+            // Print URL in action bar for user
             if (getSupportActionBar() != null) {
                 getSupportActionBar().setSubtitle("Serveur en ligne : " + url + " - " + versionName);
             }
@@ -102,6 +103,24 @@ public class MainActivity extends AppCompatActivity {
             if (getSupportActionBar() != null) {
                 getSupportActionBar().setSubtitle("Erreur serveur" + " - " + versionName);
             }
+        }
+
+        // Back button (blue)
+        Button btnBack = findViewById(R.id.btnBackFromCategory);
+        if (btnBack != null) {
+            btnBack.setOnClickListener(v -> showHome());
+        }
+
+        // Empty button (red)
+        Button btnClear = findViewById(R.id.clearCartBtn);
+        if (btnClear != null) {
+            btnClear.setOnClickListener(v -> CartActionHelper.emptyCart(cartList, this));
+        }
+
+        // Validate button (green)
+        Button btnValidate = findViewById(R.id.validateCartBtn);
+        if (btnValidate != null) {
+            btnValidate.setOnClickListener(v -> CartActionHelper.validateCart(cartList, this));
         }
     }
 
@@ -194,8 +213,6 @@ public class MainActivity extends AppCompatActivity {
         homeLayout.setVisibility(View.GONE);
         categoryItemsLayout.setVisibility(View.VISIBLE);
 
-        updateActionButton(false);
-
         gridPieces.removeAllViews();
 
         // Calculate item width for a 4-column grid
@@ -265,38 +282,11 @@ public class MainActivity extends AppCompatActivity {
     public void showHome() {
         categoryItemsLayout.setVisibility(View.GONE);
         homeLayout.setVisibility(View.VISIBLE);
-
-        updateActionButton(true);
     }
 
     private void loadMainImage() {
         // Fallback for home screen image
         ImageLoader.loadImage(mainImage, "_velo", 800,800);
-    }
-
-    public void emptyCart(View view) {
-        CartActionHelper.emptyCart(cartList, this);
-    }
-
-    public void validateCart(View view) {
-        CartActionHelper.validateCart(cartList, this);
-    }
-
-    public void updateActionButton(boolean isHome) {
-        Button btn = findViewById(R.id.validateCartBtn);
-        if (btn == null) return;
-
-        if (isHome) {
-            // Home mode : validate button
-            btn.setText(getString(R.string.cart_validate_btn));
-            btn.setBackgroundColor(Color.parseColor("#43A047")); // Vert
-            btn.setOnClickListener(v -> validateCart(v));
-        } else {
-            // Category mode : back button
-            btn.setText(getString(R.string.cart_back_btn));
-            btn.setBackgroundColor(Color.parseColor("#1E88E5")); // Bleu
-            btn.setOnClickListener(v -> showHome());
-        }
     }
 
     private int dpToPx(int dp) {

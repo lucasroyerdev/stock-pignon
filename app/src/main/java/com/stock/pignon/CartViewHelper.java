@@ -22,16 +22,9 @@ import java.util.List;
 public class CartViewHelper {
 
     /**
-     * Short version for app resume : update without changing validate/back button state
+     * Refreshes cart UI by synchronizing the visual list with the current CartManager state
      */
     public static void updateCartView(LinearLayout cartList, Context context) {
-        updateCartView(cartList, context, false, false);
-    }
-
-    /**
-     * Full version with validate/back button management
-     */
-    public static void updateCartView(LinearLayout cartList, Context context, boolean updateButton, boolean isHome) {
         if (cartList == null) return;
 
         // Clean item lists
@@ -59,11 +52,6 @@ public class CartViewHelper {
                 cartList.addView(createCartItemView(item, cartList, context));
             }
             updateTotalDisplay(context, totalMin, totalMax);
-        }
-
-        // Update validate/back button
-        if (updateButton && context instanceof MainActivity) {
-            ((MainActivity) context).updateActionButton(isHome);
         }
     }
 

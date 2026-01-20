@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--  partial_panier.xml -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/cartContainer"
     android:layout_width="350dp"
     android:layout_height="match_parent"
@@ -56,29 +57,29 @@
             android:orientation="horizontal"
             android:weightSum="2">
 
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/clearCartBtn"
                 android:layout_width="0dp"
                 android:layout_weight="1"
-                android:layout_height="60dp"
+                android:layout_height="70dp"
                 android:text="@string/cart_empty_btn"
                 android:textSize="18sp"
+                android:textStyle="bold"
                 android:textColor="#FFFFFF"
-                android:background="#E53935"
-                android:layout_marginEnd="5dp"
-                android:onClick="emptyCart"/>
+                app:backgroundTint="#E53935"
+                android:layout_marginEnd="5dp"/>
 
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/validateCartBtn"
                 android:layout_width="0dp"
                 android:layout_weight="1"
-                android:layout_height="60dp"
+                android:layout_height="70dp"
                 android:text="@string/cart_validate_btn"
                 android:textSize="18sp"
+                android:textStyle="bold"
                 android:textColor="#FFFFFF"
-                android:background="#43A047"
-                android:layout_marginStart="5dp"
-                android:onClick="validateCart"/>
+                app:backgroundTint="#43A047"
+                android:layout_marginStart="5dp"/>
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

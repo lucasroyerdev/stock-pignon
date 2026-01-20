@@ -1,58 +1,72 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--  activity_main.xml -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal"
-    android:background="#ffffff">
+    android:background="#ffffff"
+    android:baselineAligned="false"> <FrameLayout
+    android:id="@+id/contentFrame"
+    android:layout_width="0dp"
+    android:layout_height="match_parent"
+    android:layout_weight="1">
+
+    <LinearLayout
+        android:id="@+id/homeLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        tools:ignore="RtlSymmetry"> <LinearLayout
+        android:id="@+id/categoriesLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center_vertical"/>
+
+        <ImageView
+            android:id="@+id/mainImage"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:scaleType="fitCenter"
+            android:contentDescription="@string/app_name" /> </LinearLayout>
 
     <FrameLayout
-        android:id="@+id/contentFrame"
-        android:layout_width="0dp"
+        android:id="@+id/categoryItemsLayout"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="1">
+        android:visibility="gone">
 
-        <LinearLayout
-            android:id="@+id/homeLayout"
+        <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="horizontal"
-            android:paddingLeft="20dp">
-
-            <LinearLayout
-                android:id="@+id/categoriesLayout"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:gravity="center_vertical"/>
-
-            <ImageView
-                android:id="@+id/mainImage"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:scaleType="fitCenter" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/categoryItemsLayout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:visibility="gone"
             android:padding="10dp">
-
-            <ScrollView
+            <GridLayout
+                android:id="@+id/gridPieces"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
-                <GridLayout
-                    android:id="@+id/gridPieces"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:columnCount="4" />
-            </ScrollView>
-        </LinearLayout>
+                android:layout_height="wrap_content"
+                android:columnCount="4" />
+        </ScrollView>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnBackFromCategory"
+            android:layout_width="200dp"
+            android:layout_height="70dp"
+            android:layout_gravity="bottom|start"
+            android:layout_margin="20dp"
+            android:text="@string/cart_back_btn"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            app:backgroundTint="#1E88E5"
+            android:elevation="8dp"
+            tools:targetApi="l" />
     </FrameLayout>
+</FrameLayout>
 
     <include layout="@layout/partial_cart" />
 

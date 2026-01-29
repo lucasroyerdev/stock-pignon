@@ -8,10 +8,11 @@
       "bgColor": "#FF0000",
       "textColor": "#000000",
       "items": [
+        {"name": "Vélo", "minPrice": 20, "maxPrice": 40, "image": "velo"},
         {"name": "Cadre", "minPrice": 20, "maxPrice": 40, "image": "cadre"},
         {"name": "Selle", "minPrice": 1, "maxPrice": 7, "image": "selle"},
-        {"name": "Tige de selle", "minPrice": 1, "maxPrice": 10, "image": "tigeselle"},
-        {"name": "Collier de selle", "minPrice": 1, "maxPrice": 4, "image": "collierselle"}
+        {"name": "Tige de selle", "minPrice": 1, "maxPrice": 10, "image": "tige_selle"},
+        {"name": "Collier de selle", "minPrice": 1, "maxPrice": 4, "image": "collier_selle"}
       ]
     },
     {
@@ -20,10 +21,14 @@
       "textColor": "#000000",
       "items": [
         {"name": "Fourche", "minPrice": 10, "maxPrice": 20, "image": "fourche"},
-        {"name": "Jeu de direction", "minPrice": 1, "maxPrice": 8, "image": "jeudirection"},
-        {"name": "Potence headset", "minPrice": 2, "maxPrice": 8, "image": "potenceheadset"},
-        {"name": "Potence plongeur", "minPrice": 2, "maxPrice": 8, "image": "potenceplongeur"},
-        {"name": "Tige plongeur", "minPrice": 1, "maxPrice": 4, "image": "tigeplongeur"}
+        {"name": "Fourche suspendue", "minPrice": 10, "maxPrice": 20, "image": "fourche_suspendue"},
+        {"name": "Roulement direction", "minPrice": 1, "maxPrice": 8, "image": "roulement_direction"},
+        {"name": "Jeu de direction", "minPrice": 1, "maxPrice": 8, "image": "jeu_direction"},
+        {"name": "Potence headset", "minPrice": 2, "maxPrice": 8, "image": "potence_headset"},
+        {"name": "Potence headset réglable", "minPrice": 2, "maxPrice": 8, "image": "potence_headset_reglable"},
+        {"name": "Potence plongeur", "minPrice": 2, "maxPrice": 8, "image": "potence_plongeur"},
+        {"name": "Potence plongeur réglable", "minPrice": 2, "maxPrice": 8, "image": "potence_plongeur_reglable"},
+        {"name": "Tige plongeur", "minPrice": 1, "maxPrice": 4, "image": "tige_plongeur"}
       ]
     },
     {
@@ -31,13 +36,14 @@
       "bgColor": "#F16000",
       "textColor": "#000000",
       "items": [
-        {"name": "Poignée combo", "minPrice": 2, "maxPrice": 8, "image": "poigneecombo"},
-        {"name": "Poignée frein", "minPrice": 2, "maxPrice": 8, "image": "poigneefrein"},
-        {"name": "Poignée gachette", "minPrice": 2, "maxPrice": 8, "image": "poigneegachette"},
-        {"name": "Poignée tournante", "minPrice": 2, "maxPrice": 6, "image": "poigneetournante"},
+        {"name": "Poignée combo", "minPrice": 2, "maxPrice": 8, "image": "poignee_combo"},
+        {"name": "Poignée frein", "minPrice": 2, "maxPrice": 8, "image": "poignee_frein"},
+        {"name": "Poignée gachette", "minPrice": 2, "maxPrice": 8, "image": "poignee_gachette"},
+        {"name": "Poignée tournante", "minPrice": 2, "maxPrice": 6, "image": "poignee_tournante"},
+        {"name": "Manette cadre", "minPrice": 2, "maxPrice": 6, "image": "manette_cadre"},
         {"name": "Gaine", "minPrice": 0, "maxPrice": 2, "image": "gaine"},
         {"name": "Câble", "minPrice": 0, "maxPrice": 1, "image": "cable"},
-        {"name": "Poignée", "minPrice": 1, "maxPrice": 4, "image": "poignees"},
+        {"name": "Poignée", "minPrice": 1, "maxPrice": 4, "image": "poignee"},
         {"name": "Cintre", "minPrice": 5, "maxPrice": 10,"image": "cintre"}
       ]
     },
@@ -46,11 +52,15 @@
       "bgColor": "#FF00FF",
       "textColor": "#000000",
       "items": [
-        {"name": "Étrier patin", "minPrice": 2, "maxPrice": 8, "image": "etrierpatin"},
-        {"name": "Étrier disque", "minPrice": 2, "maxPrice": 8, "image": "etrierdisque"},
+        {"name": "Étrier V-brake", "minPrice": 2, "maxPrice": 8, "image": "etrier_vbrake"},
+        {"name": "Étrier Cantilever", "minPrice": 2, "maxPrice": 8, "image": "etrier_cantilever"},
+        {"name": "Étrier Caliper ou Mafac", "minPrice": 2, "maxPrice": 8, "image": "etrier_mafac_caliper"},
+        {"name": "Étrier disque câble", "minPrice": 2, "maxPrice": 8, "image": "etrier_cable"},
+        {"name": "Étrier disque hydraulique", "minPrice": 2, "maxPrice": 8, "image": "etrier_hydraulique"},
         {"name": "Patins", "minPrice": 1, "maxPrice": 2, "image": "patins"},
         {"name": "Disque", "minPrice": 1, "maxPrice": 5, "image": "disque"},
-        {"name": "Visserie frein", "minPrice": 0, "maxPrice": 1, "image": "visseriefrein"}
+        {"name": "Pont central cantilever", "minPrice": 0, "maxPrice": 1, "image": "frein_pontcentral"},
+        {"name": "Visserie frein", "minPrice": 0, "maxPrice": 1, "image": "visserie_frein"}
       ]
     },
     {
@@ -58,15 +68,23 @@
       "bgColor": "#0000FF",
       "textColor": "#FFFFFF",
       "items": [
-        {"name": "Roue avant", "minPrice": 20, "maxPrice": 40, "image": "roueavant"},
-        {"name": "Roue arrière", "minPrice": 20, "maxPrice": 40, "image": "rouearriere"},
-        {"name": "Axe rapide", "minPrice": 1, "maxPrice": 2, "image": "axerapide"},
-        {"name": "Axe roue", "minPrice": 1, "maxPrice": 3, "image": "axeroue"},
+        {"name": "Chambre à air", "minPrice": 20, "maxPrice": 40, "image": "chambre_air"},
+        {"name": "Roue avant", "minPrice": 20, "maxPrice": 40, "image": "roue_avant"},
+        {"name": "Roue arrière", "minPrice": 20, "maxPrice": 40, "image": "roue_arriere"},
+        {"name": "Axe rapide", "minPrice": 1, "maxPrice": 2, "image": "axe_rapide"},
+        {"name": "Axe roue", "minPrice": 1, "maxPrice": 3, "image": "axe_roue"},
         {"name": "Rayon", "minPrice": 0, "maxPrice": 2, "image": "rayon"},
-        {"name": "Moyeu avant", "minPrice": 2, "maxPrice": 8, "image": "moyeuavant"},
-        {"name": "Moyeu arrière", "minPrice": 2, "maxPrice": 10, "image": "moyeuarriere"},
-        {"name": "Pneu", "minPrice": 10, "maxPrice": 20, "image": "pneu"},
-        {"name": "Visserie roue", "minPrice": 0, "maxPrice": 1, "image": "visserieroue"}
+        {"name": "Jante", "minPrice": 0, "maxPrice": 2, "image": "jante"},
+        {"name": "Fond de jante", "minPrice": 0, "maxPrice": 2, "image": "fond_jante"},
+        {"name": "Moyeu avant", "minPrice": 2, "maxPrice": 8, "image": "moyeu_avant"},
+        {"name": "Moyeu arrière cassette", "minPrice": 2, "maxPrice": 10, "image": "moyeu_arriere_cassette"},
+        {"name": "Moyeu arrière roue libre", "minPrice": 2, "maxPrice": 10, "image": "moyeu_arriere_rouelibre"},
+        {"name": "Moyeu arrière rétropédalage", "minPrice": 2, "maxPrice": 10, "image": "moyeu_retropedalage"},
+        {"name": "Pneu petite taille", "minPrice": 10, "maxPrice": 20, "image": "pneu_petit"},
+        {"name": "Pneu 26\"", "minPrice": 10, "maxPrice": 20, "image": "pneu_26"},
+        {"name": "Pneu 28\" route", "minPrice": 10, "maxPrice": 20, "image": "pneu_route"},
+        {"name": "Pneu 28\" large", "minPrice": 10, "maxPrice": 20, "image": "pneu_large"},
+        {"name": "Visserie roue", "minPrice": 0, "maxPrice": 1, "image": "visserie_roue"}
       ]
     },
     {
@@ -74,12 +92,13 @@
       "bgColor": "#FFCC00",
       "textColor": "#000000",
       "items": [
-        {"name": "Dérailleur avant", "minPrice": 2, "maxPrice": 10, "image": "fd"},
-        {"name": "Dérailleur arrière", "minPrice": 4, "maxPrice": 12, "image": "rd"},
+        {"name": "Dérailleur arrière", "minPrice": 2, "maxPrice": 10, "image": "derailleur_arriere"},
+        {"name": "Dérailleur avant tirage bas", "minPrice": 4, "maxPrice": 12, "image": "derailleur_avant_tiragebas"},
+        {"name": "Dérailleur avant tirage haut", "minPrice": 4, "maxPrice": 12, "image": "derailleur_avant_tiragebas"},
         {"name": "Cassette", "minPrice": 2, "maxPrice": 6, "image": "cassette"},
-        {"name": "Roue libre", "minPrice": 2, "maxPrice": 6, "image": "rouelibre"},
+        {"name": "Roue libre", "minPrice": 2, "maxPrice": 6, "image": "roue_libre"},
         {"name": "Chaîne", "minPrice": 2, "maxPrice": 6, "image": "chaine"},
-        {"name": "Visserie transmission", "minPrice": 0, "maxPrice": 1, "image": "visserietransmission"}
+        {"name": "Visserie transmission", "minPrice": 0, "maxPrice": 1, "image": "visserie_transmission"}
       ]
     },
     {
@@ -87,13 +106,17 @@
       "bgColor": "#00FFFF",
       "textColor": "#000000",
       "items": [
-        {"name": "Boîtier pédalier", "minPrice": 4, "maxPrice": 12, "image": "boitierpedalier"},
-        {"name": "Manivelle gauche", "minPrice": 4, "maxPrice": 12, "image": "manivellegauche"},
-        {"name": "Manivelle droite", "minPrice": 4, "maxPrice": 12, "image": "manivelledroite"},
-        {"name": "Pédalier complet", "minPrice": 6, "maxPrice": 15, "image": "pedaliercomplet"},
+        {"name": "Axe pédalier carré ou clavette", "minPrice": 4, "maxPrice": 12, "image": "axe_pedalier"},
+        {"name": "Roulement pédalier", "minPrice": 4, "maxPrice": 12, "image": "roulement_pedalier"},
+        {"name": "Boîtier pédalier cartouche", "minPrice": 4, "maxPrice": 12, "image": "boitier_cartouche"},
+        {"name": "Boîtier pédalier Hollowtech 2", "minPrice": 4, "maxPrice": 12, "image": "boitier_hollowtech"},
+        {"name": "Manivelle gauche", "minPrice": 4, "maxPrice": 12, "image": "manivelle_gauche"},
+        {"name": "Manivelle droite", "minPrice": 4, "maxPrice": 12, "image": "manivelle_droite"},
+        {"name": "Pédalier complet", "minPrice": 6, "maxPrice": 15, "image": "pedalier_complet"},
         {"name": "Pédales", "minPrice": 2, "maxPrice": 8, "image": "pedales"},
-        {"name": "Plateau", "minPrice": 2, "maxPrice": 8, "image": "plateau"},
-        {"name": "Visserie pédalier", "minPrice": 0, "maxPrice": 1, "image": "visseriepedalier"}
+        {"name": "Plateau 4 branches", "minPrice": 2, "maxPrice": 8, "image": "plateau_4"},
+        {"name": "Plateau 5 branches", "minPrice": 2, "maxPrice": 8, "image": "plateau_5"},
+        {"name": "Visserie pédalier", "minPrice": 0, "maxPrice": 1, "image": "visserie_pedalier"}
       ]
     },
     {
@@ -102,10 +125,13 @@
       "textColor": "#000000",
       "items": [
         {"name": "Béquille", "minPrice": 2, "maxPrice": 8, "image": "bequille"},
-        {"name": "Garde boue", "minPrice": 2, "maxPrice": 8, "image": "gardeboue"},
+        {"name": "Garde boue", "minPrice": 2, "maxPrice": 8, "image": "garde_boue"},
         {"name": "Lampe", "minPrice": 1, "maxPrice": 5, "image": "lampe"},
-        {"name": "Porte bagage", "minPrice": 2, "maxPrice": 10, "image": "portebagage"},
-        {"name": "Porte bidon", "minPrice": 0, "maxPrice": 1, "image": "portebidon"}
+        {"name": "Porte bagage", "minPrice": 2, "maxPrice": 10, "image": "porte_bagage"},
+        {"name": "Porte bidon", "minPrice": 0, "maxPrice": 1, "image": "porte_bidon"},
+        {"name": "Pompe", "minPrice": 0, "maxPrice": 1, "image": "pompe"},
+        {"name": "Panier", "minPrice": 0, "maxPrice": 1, "image": "panier"},
+        {"name": "Rétroviseur", "minPrice": 0, "maxPrice": 1, "image": "retroviseur"}
       ]
     }
   ]

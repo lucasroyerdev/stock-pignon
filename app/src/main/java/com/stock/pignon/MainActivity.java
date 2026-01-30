@@ -89,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // Launch server
-        server = new ControlServer(8080);
+        server = new ControlServer(this,8080);
         try {
             server.start();
             String url = "http://" + getDeviceIP() + ":8080";

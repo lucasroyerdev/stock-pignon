@@ -20,8 +20,10 @@ public class CartItem {
     public int getMinPrice() { return minPrice; }
     public int getMaxPrice() { return maxPrice; }
     public int getQuantity() { return quantity; }
-    public void setQuantity(int quantity) { this.quantity = quantity; }
     public int getTotalMin() { return minPrice * quantity; }
     public int getTotalMax() { return maxPrice * quantity; }
     public String getImageFile() { return imageFile; }
+
+    // Setters
+    public void setQuantity(int quantity) { this.quantity = quantity; }
 }

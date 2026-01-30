@@ -14,12 +14,21 @@ public class Category {
     @SuppressWarnings("unused")
     private List<Item> items;
 
+    // Empty constructor for GSON
+    public Category() {}
+
+    // Full constructor for online editor
+    public Category(String name, List<Item> items) {
+        this.name = name;
+        this.items = items;
+        // Default colors
+        this.bgColor = "#0049AF";
+        this.textColor = "#FFFFFF";
+    }
+
+    // Getters
     public String getName() { return name; }
     public String getBgColor() { return bgColor; }
     public String getTextColor() { return textColor; }
-
-    // Avoid crash if json isn't readable
-    public List<Item> getItems() {
-        return items != null ? items : new ArrayList<>();
-    }
+    public List<Item> getItems() { return items != null ? items : new ArrayList<>(); }
 }

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+            background: #eee;
+            margin-bottom: 100px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        input[type='text'],
+        input[type='number'] {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .img-p {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            background: #f0f0f0;
+            border-radius: 5px;
+        }
+
+        .btn-add {
+            background: #0049AF;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            margin-top: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .btn-save {
+            background: #2E7D32;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            width: auto;
+            white-space: nowrap;
+        }
+
+        .btn-del {
+            background: #d32f2f;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            padding: 5px 10px;
+        }
+
+        .link-mod {
+            background: none;
+            border: none;
+            color: #0049AF;
+            text-decoration: underline;
+            cursor: pointer;
+            padding: 0;
+            font-size: 12px;
+            appearance: none;
+            -webkit-appearance: none;
+            outline: none;
+        }
+
+        .actions-bar {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn-cancel {
+            background: #F54927;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            white-space: nowrap;
+        }
+
+        .btn-cat {
+            background: #0049AF;
+            color: white;
+            padding: 15px 25px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .btn-back {
+            background: #000000;
+            color: white;
+            padding: 15px 25px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .input-h2 {
+            font-size: 1.5rem !important;
+            font-weight: bold !important;
+            border: none !important;
+            background: transparent !important;
+            color: #555 !important;
+            width: auto;
+            max-width: 70%;
+            border-bottom: 1px dashed #ccc !important;
+            outline: none;
+        }
+
+        .input-h2:focus {
+            border-bottom: 2px solid #0049AF;
+            color: #0049AF;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Éditeur de Catalogue</h1>
+    <form action="/save_editor" method="POST">
+
+        {{GENERATED_CONTENT}}
+
+        <div class="actions-bar">
+            <button type="button" class="btn-back" onclick="window.location.href= '/'">← Retour </button>
+            <button type="button" class="btn-cancel" onclick="handleCancel(event)">✖ Tout annuler</button>
+            <button type="button" class="btn-cat" onclick="addCategory()">+ Catégorie</button>
+            <input type="submit" value="💾 Enregistrer tout" class="btn-save" style="position:static; transform:none;">
+        </div>
+    </form>
+
+    <script>
+        function addRow(cat) {
+            var t = document.getElementById('table-' + cat);
+            var r = t.insertRow(-1);
+            var id = Date.now();
+            r.innerHTML = '<td><input type="file" id="f_' + id + '" style="display:none" onchange="uImg(this)">' +
+                '<button type="button" class="link-mod" onclick="document.getElementById(\'f_' + id + '\').click()">Ajouter</button>' +
+                '<input type="hidden" name="new|' + cat + '|' + id + '|img" value=""></td>' +
+                '<td><input type="text" name="new|' + cat + '|' + id + '|name" placeholder="Nom..." required></td>' +
+                '<td><input type="number" name="new|' + cat + '|' + id + '|min" value="0" min="0" required></td>' +
+                '<td><input type="number" name="new|' + cat + '|' + id + '|max" value="0" min="0" required></td>' +
+                '<td><button type="button" class="btn-del" onclick="var l=this.parentNode.parentNode; l.parentNode.removeChild(l);">×</button></td>';
+        }
+
+        function uImg(el) {
+            var f = el.files[0];
+            if (!f) return;
+            var row = el.parentNode.parentNode;
+            var id = f.name.split('.').slice(0, -1).join('.');
+            row.querySelector('input[type="hidden"]').value = id;
+            var fd = new FormData();
+            fd.append('images', f);
+            fetch('/upload_images', { method: 'POST', body: fd }).then(function () { alert('Image envoyée : ' + id); });
+        }
+
+        function handleCancel(e) {
+            // Avoid form to wait for data to send
+            if (e) e.preventDefault();
+
+            if (confirm("Attention : toutes vos modifications seront perdues. Continuer ?")) {
+                // Random URL parameters ?t= to force browser to forget previous data
+                window.location.href = "/edit?t=" + Date.now();
+            }
+        }
+
+        function addCategory() {
+            var name = prompt("Nom de la nouvelle catégorie ?");
+            if (!name || name.trim() === "") return;
+
+            // Temp ID
+            var tempId = "newcat_" + Date.now();
+
+            var container = document.createElement('div');
+            container.className = 'card';
+            container.innerHTML =
+                '<h2>' +
+                '<input type="text" class="input-h2" name="cat|' + tempId + '|name" value="' + name + '">' +
+                ' <button type="button" class="btn-del" onclick="if(confirm(\'Supprimer cette catégorie ?\')) this.closest(\'.card\').remove()">×</button>' +
+                '</h2>' +
+                '<table id="table-' + tempId + '">' +
+                '<tr><th>Image</th><th>Nom</th><th>Prix Min</th><th>Prix Max</th><th></th></tr>' +
+                '</table>' +
+                '<button type="button" class="btn-add" onclick="addRow(\'' + tempId + '\')">+ Ajouter article</button>';
+
+            var form = document.querySelector('form');
+            var actionBar = document.querySelector('.actions-bar');
+            form.insertBefore(container, actionBar);
+
+            container.scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>

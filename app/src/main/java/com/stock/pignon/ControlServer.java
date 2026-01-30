@@ -1,6 +1,7 @@
 // ControlServer.java
 package com.stock.pignon;
 
+import android.content.Context;
 import android.os.Environment;
 
 import fi.iki.elonen.NanoHTTPD;
@@ -13,6 +14,7 @@ import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
+import java.util.Scanner;
 
 /**
  * Create a web server to remote management of app assets.
@@ -20,13 +22,16 @@ import java.util.List;
 // Inherit what is needed to build a web server
 public class ControlServer extends NanoHTTPD {
 
+    private final Context context;
+
     // Assets folders
     private final File storageRoot = Environment.getExternalStorageDirectory();
     private final File baseDir = new File(storageRoot, Config.EXTERNAL_DIR_NAME);
     private final File imagesDir = new File(baseDir, Config.IMAGES_SUBDIR_NAME);
 
-    public ControlServer(int port) {
+    public ControlServer(Context context, int port) {
         super(port);
+        this.context = context;
     }
 
     /**
@@ -37,33 +42,29 @@ public class ControlServer extends NanoHTTPD {
         // Get requested address
         String uri = session.getUri();
 
-        switch (uri) {
-            case "/download_input":
-                return downloadFile(Config.INPUT_JSON_NAME);
-
-            case "/output_json":
-                return viewFile(Config.OUTPUT_JSON_NAME);
-
-            case "/download_output_json":
-                return downloadFile(Config.OUTPUT_JSON_NAME);
-
-            case "/output_csv":
-                return viewFile(Config.OUTPUT_CSV_NAME);
-
-            case "/download_output_csv":
-                return downloadFile(Config.OUTPUT_CSV_NAME);
-
-            case "/":
-            case "/index.html":
-                return newFixedLengthResponse(getHtmlResponse());
+        if (session.getMethod() == Method.GET) {
+            switch (uri) {
+                case "/download_input":
+                    return downloadFile(Config.INPUT_JSON_NAME);
+                case "/output_json":
+                    return viewFile(Config.OUTPUT_JSON_NAME);
+                case "/download_output_json":
+                    return downloadFile(Config.OUTPUT_JSON_NAME);
+                case "/output_csv":
+                    return viewFile(Config.OUTPUT_CSV_NAME);
+                case "/download_output_csv":
+                    return downloadFile(Config.OUTPUT_CSV_NAME);
+                case "/":
+                    return newFixedLengthResponse(getHome());
+            }
         }
 
-        // File upload management
         if (session.getMethod() == Method.POST) {
-            if (uri.equals("/upload_json")) {
-                return handleJsonUpload(session);
-            } else if (uri.equals("/upload_images")) {
-                return handleImagesUpload(session);
+            switch (uri) {
+                case "/upload_json":
+                    return handleJsonUpload(session);
+                case "/upload_images":
+                    return handleImagesUpload(session);
             }
         }
 
@@ -73,58 +74,16 @@ public class ControlServer extends NanoHTTPD {
     /**
      * HTML UI for users
      */
-    private String getHtmlResponse() {
-        return "<html>" +
-                "<head>" +
-                "<meta charset='UTF-8'>" +
-                "<meta name='viewport' content='width=device-width, initial-scale=1'>" +
-                "<style>" +
-                "body { font-family: sans-serif; line-height: 1.6; padding: 20px; color: #333; max-width: 800px; margin: auto; }" +
-                "h1 { color: #0049AF; border-bottom: 2px solid #0049AF; }" +
-                "h2 { color: #555; margin-top: 30px; }" +
-                ".card { background: #f4f4f4; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ddd; }" +
-                ".btn { display: inline-block; width: 280px; height: 45px; line-height: 45px; text-align: center; background: #0049AF; color: white; text-decoration: none; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; box-sizing: border-box; padding: 0; -webkit-appearance: none; font-family: inherit; font-size: 14px; font-style: normal; letter-spacing: normal; margin: 10px 5px; vertical-align: middle;}" +
-                ".btn-download { background: #2E7D32; }" +
-                "input[type='file'] { margin: 10px 0; }" +
-                ".status { font-weight: bold; color: green; }" +
-                "</style>" +
-                "</head>" +
-                "<body>" +
-                "<h1>Application : stock-pignon</h1>" +
-
-                "<h2>Gestion des stocks</h2>" +
-                "<div class='card'>" +
-                "<h3>Récupérer les sacoches des adhérent·es</h3>" +
-                "<p>Télécharger le décompte des pièces sorties de l'atelier.</p>" +
-                "<a href='/output_json' class='btn'>Voir stock.json</a>" +
-                "<a href='/output_csv' class='btn'>Voir stock.csv</a>" +
-                "<a href='/download_output_json' class='btn'>Télécharger stock.json</a>" +
-                "<a href='/download_output_csv' class='btn'>Télécharger stock.csv</a>" +
-                "</div>" +
-
-                "<h2>Modifier le catalogue</h2>" +
-                "<div class='card'>" +
-                "<h3>Gestion du fichier JSON</h3>" +
-                "<p>Catalogue actuel : <a href='/download_input' class='btn'>Télécharger pieces.json</a></p>" +
-                "<hr>" +
-                "<form action='/upload_json' method='post' enctype='multipart/form-data'>" +
-                "<p><strong>Envoyer un nouveau catalogue :</strong></p>" +
-                "<input type='file' name='json_file' accept='.json'><br>" +
-                "<input type='submit' value='Remplacer pieces.json' class='btn'>" +
-                "</form>" +
-                "</div>" +
-
-                "<div class='card'>" +
-                "<h3>Gestion des images</h3>" +
-                "<form action='/upload_images' method='post' enctype='multipart/form-data'>" +
-                "<p><strong>Ajouter/Modifier des images (PNG/JPG) :</strong></p>" +
-                "<input type='file' name='images' accept='image/*' multiple><br>" +
-                "<input type='submit' value='Envoyer les images' class='btn'>" +
-                "</form>" +
-                "</div>" +
-
-                "</body>" +
-                "</html>";
+    private String getHome() {
+        try {
+            InputStream is = context.getAssets().open("index.html");
+            Scanner s = new Scanner(is, "UTF-8").useDelimiter("\\A");
+            String html = s.hasNext() ? s.next() : "";
+            is.close();
+            return html;
+        } catch (IOException e) {
+            return "<html><body>❌ Erreur de chargement du template</body></html>";
+        }
     }
 
     /**

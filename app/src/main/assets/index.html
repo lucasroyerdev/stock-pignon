@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <style>
+        body { font-family: sans-serif; line-height: 1.6; padding: 20px; color: #333; max-width: 800px; margin: auto; }
+        h1 { color: #0049AF; border-bottom: 2px solid #0049AF; }
+        h2 { color: #555; margin-top: 30px; }
+        .card { background: #f4f4f4; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ddd; }
+        .btn { display: inline-block; width: 280px; height: 45px; line-height: 45px; text-align: center; background: #0049AF; color: white; text-decoration: none; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; box-sizing: border-box; padding: 0; -webkit-appearance: none; font-family: inherit; font-size: 14px; font-style: normal; letter-spacing: normal; margin: 10px 5px; vertical-align: middle;}
+        .btn-download { background: #2E7D32; }
+        input[type='file'] { margin: 10px 0; }
+        .status { font-weight: bold; color: green; }
+    </style>
+</head>
+<body>
+<h1>Application : stock-pignon</h1>
+<h2>Gestion des stocks</h2>
+<div class='card'>
+    <h3>Récupérer les sacoches des adhérent·es</h3>
+    <p>Télécharger le décompte des pièces sorties de l'atelier.</p>
+    <a href='/output_json' class='btn'>Voir stock.json</a>
+    <a href='/output_csv' class='btn'>Voir stock.csv</a>
+    <a href='/download_output_json' class='btn'>Télécharger stock.json</a>
+    <a href='/download_output_csv' class='btn'>Télécharger stock.csv</a>
+</div>
+<h2>Modifier le catalogue</h2>
+<div class='card'>
+    <h3>Gestion du fichier JSON</h3>
+    <p>Catalogue actuel : <a href='/download_input' class='btn'>Télécharger pieces.json</a></p>
+    <hr>
+    <form action='/upload_json' method='post' enctype='multipart/form-data'>
+        <p><strong>Envoyer un nouveau catalogue :</strong></p>
+        <input type='file' name='json_file' accept='.json'><br>
+        <input type='submit' value='Remplacer pieces.json' class='btn'>
+    </form>
+</div>
+<div class='card'>
+    <h3>Gestion des images</h3>
+    <form action='/upload_images' method='post' enctype='multipart/form-data'>
+        <p><strong>Ajouter/Modifier des images (PNG/JPG) :</strong></p>
+        <input type='file' name='images' accept='image/*' multiple><br>
+        <input type='submit' value='Envoyer les images' class='btn'>
+    </form>
+</div>
+</body>
+</html>

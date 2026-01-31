@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 
 <head>
     <meta charset="UTF-8">
+    <title>Éditeur de Catalogue</title>
     <style>
         body {
             font-family: sans-serif;
@@ -132,7 +133,7 @@
             cursor: pointer;
             font-size: 18px;
             font-weight: bold;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         }
 
         .btn-back {
@@ -144,7 +145,7 @@
             cursor: pointer;
             font-size: 18px;
             font-weight: bold;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         }
 
         .input-h2 {
@@ -168,7 +169,7 @@
 
 <body>
     <h1>Éditeur de Catalogue</h1>
-    <form action="/save_editor" method="POST">
+    <form id="editor-form" accept-charset="UTF-8">
 
         {{GENERATED_CONTENT}}
 
@@ -176,7 +177,8 @@
             <button type="button" class="btn-back" onclick="window.location.href= '/'">← Retour </button>
             <button type="button" class="btn-cancel" onclick="handleCancel(event)">✖ Tout annuler</button>
             <button type="button" class="btn-cat" onclick="addCategory()">+ Catégorie</button>
-            <input type="submit" value="💾 Enregistrer tout" class="btn-save" style="position:static; transform:none;">
+            <button type="button" onclick="sendData()" class="btn-save" style="position:static; transform:none;">💾
+                Enregistrer tout</button>
         </div>
     </form>
 
@@ -239,6 +241,57 @@
             form.insertBefore(container, actionBar);
 
             container.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function sendData() {
+            const form = document.getElementById('editor-form');
+            const data = {
+                cat_order_list: "",
+                items: {}
+            };
+
+            // Browse showed categories
+            const catOrder = [];
+            document.querySelectorAll('.card').forEach((card, catIdx) => {
+                const catInput = card.querySelector('input[name^="cat|"]');
+                if (!catInput) return;
+
+                const techId = "c" + catIdx; // c0, c1...
+                catOrder.push(techId);
+                data.items["cat|" + techId + "|name"] = catInput.value;
+
+                // Browse each line
+                card.querySelectorAll('table tr').forEach((row, itemIdx) => {
+                    if (itemIdx === 0) return; // Skip title line (th)
+                    const realIdx = itemIdx - 1; // Start at 0
+                    row.querySelectorAll('input').forEach(input => {
+                        const parts = input.name.split('|');
+                        if (parts.length >= 4) {
+                            // parts[0] = "item" ou "new", parts[3] = "name" ou "min" ou "max"
+                            const finalKey = "item|" + techId + "|" + realIdx + "|" + parts[3];
+                            data.items[finalKey] = input.value;
+                        }
+                    });
+                });
+            });
+
+            data.cat_order_list = catOrder.join(',');
+
+            // Create new clean struct : cat|c0|name, item|c0|0|name...
+            fetch('/save_editor', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json; charset=UTF-8' },
+                body: JSON.stringify(data)
+            })
+                .then(r => {
+                    if (r.ok) {
+                        alert("✅ Enregistré !");
+                        window.location.reload(); // Optionnel : rafraîchit pour voir le résultat propre
+                    } else {
+                        alert("❌ Erreur serveur");
+                    }
+                })
+                .catch(() => alert("❌ Erreur réseau"));
         }
     </script>
 </body>

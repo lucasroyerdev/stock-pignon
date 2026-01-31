@@ -4,6 +4,7 @@ package com.stock.pignon;
 import android.content.Context;
 import android.os.Environment;
 import android.util.Log;
+import org.json.JSONObject;
 
 import fi.iki.elonen.NanoHTTPD;
 import java.io.File;
@@ -12,12 +13,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.ByteArrayOutputStream;
+
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Scanner;
+import java.util.Iterator;
 
 /**
  * Create a web server to remote management of app assets.
@@ -110,57 +114,67 @@ public class ControlServer extends NanoHTTPD {
         DataLoader.loadData();
         // Create an html string to fill the template
         StringBuilder html = new StringBuilder();
+        // Save categories order
+        List<String> orderList = new ArrayList<>();
+        int index = 0;
 
         // Browse map : 'id' for categories name, 'items' for items list
         for (Map.Entry<String, List<Item>> section : DataLoader.getAllSections().entrySet()) {
-            String id = section.getKey();
+            String technicalId = "cat_" + index;
+            String displayName = section.getKey();
             List<Item> items = section.getValue();
 
-            // For each category, render a HTML card
-            html.append(renderCategorySection(id, items));
-        }
+            orderList.add(technicalId);
 
-        return getHtml("editor.html").replace("{{GENERATED_CONTENT}}", html.toString());
+            // For each category, render a HTML card
+            html.append(renderCategorySection(technicalId, displayName, items));
+            index++;
+        }
+        String orderField = "<input type='hidden' name='cat_order_list' value='" +
+                android.text.TextUtils.join(",", orderList) + "'>";
+
+        return getHtml("editor.html").replace("{{GENERATED_CONTENT}}", html + orderField);
     }
 
     /**
      * Generate HTML section for each category
      */
-    private String renderCategorySection(String id, List<Item> items) {
+    private String renderCategorySection(String techId, String displayName, List<Item> items) {
         StringBuilder sb = new StringBuilder();
 
         sb.append("<div class='card'>");
         sb.append("<h2>");
 
-        if ("global".equals(id)) {
+        if ("global".equals(displayName)) {
             sb.append("Articles globaux");
             // Hidden input to mark cat for server
-            sb.append("<input type='hidden' name='cat|").append(id).append("|name' value='global'>");
+            sb.append("<input type='hidden' name='cat|").append(displayName).append("|name' value='global'>");
+            techId = "global";
         } else {
             // Copy H2 theme
-            sb.append("<input type='text' name='cat|").append(id).append("|name' ")
-                    .append("value=\"").append(id).append("\" ")
-                    .append("style='font-size: 1.5rem; font-weight: bold; border: none; background: transparent; color: #555; width: auto; max-width: 70%; border-bottom: 1px dashed #ccc;'>");
+            sb.append("<input type='text' name='cat|").append(techId).append("|name' ")
+                    .append("value=\"").append(displayName).append("\" class='input-h2'>");
 
             // Delete category button
             sb.append(" <button type='button' class='btn-del' style='vertical-align: middle; margin-left: 10px;' ")
-                    .append("onclick=\"if(confirm('Supprimer cette catégorie et tous ses articles ?')) this.closest('.card').remove()\">×</button>");
+                    .append("onclick=\"if(confirm('Supprimer cette catégorie et tous ses articles?')) this.closest('.card').remove()\">×</button>");
         }
 
         sb.append("</h2>");
 
         // Build table
-        sb.append("<table id='table-").append(id).append("'>");
-        sb.append("<tr><th>Image</th><th>Nom</th><th>Prix Min</th><th>Prix Max</th><th></th></tr>");
+        sb.append("<table id='table-").append(techId).append("'>");
+        sb.append("<tr><th>Image</th><th>Nom</th><th>Prix Min</th><th>Prix Max</th></tr>");
 
+        int rowIdx = 0;
         for (Item item : items) {
-            sb.append(renderItemRow(id, item));
+            sb.append(renderItemRow(techId, item, rowIdx++));
         }
 
         sb.append("</table>");
 
         // Button to add item in this category
-        sb.append("<button type='button' class='btn-add' onclick=\"addRow('").append(id).append("')\">+ Ajouter article</button>");
+        sb.append("<button type='button' class='btn-add' onclick=\"addRow('").append(techId).append("')\">+ Ajouter article</button>");
         sb.append("</div>");
 
         return sb.toString();
@@ -169,8 +183,8 @@ public class ControlServer extends NanoHTTPD {
     /**
      * Generate HTML row for each item
      */
-    private String renderItemRow(String catName, Item item) {
-        String prefix = "item|" + catName + "|" + item.getName();
+    private String renderItemRow(String techId, Item item, int idx) {
+        String prefix = "item|" + techId + "|" + idx;
         return "<tr>" +
                 "<td><img src='/img_view/" + item.getImage() + "' class='img-p' onerror=\"this.src='https://placehold.co/60?text=?'\">" +
                 "<br><input type='file' accept='.jpg,.png' style='font-size:10px; width:70px' onchange='uImg(this)'>" +
@@ -202,105 +216,75 @@ public class ControlServer extends NanoHTTPD {
         }
     }
 
+    /**
+     * Receive JSON and update cache and storage catalog
+     */
     private Response handleSaveEditor(IHTTPSession session) {
         try {
-            // NanoHTTPD reads post request : copy all data then sort parameters
+            // NanoHTTPD read request
             Map<String, String> files = new HashMap<>();
             session.parseBody(files);
-            Map<String, List<String>> params = session.getParameters();
 
-            // Temp struct for modified categories
-            // Key is category is, value is item list
-            Map<String, List<Item>> categoriesMap = new LinkedHashMap<>();
-            // Map id and categories names
-            Map<String, String> categoryNames = new HashMap<>();
-
-            // Identify categories with "cat|id123|name"
-            for (Map.Entry<String, List<String>> paramEntry : params.entrySet()) {
-                String key = paramEntry.getKey();
-                if (key.startsWith("cat|") && key.endsWith("|name")) {
-                    String[] parts = key.split("\\|");
-                    String catId = parts[1];
-                    String catName = paramEntry.getValue().get(0);
-
-                    // Create category only if it doesn't exist already
-                    if (!categoriesMap.containsKey(catId)) {
-                        categoriesMap.put(catId, new ArrayList<>());
-                        categoryNames.put(catId, catName);
-                    }
-                }
+            String jsonStr = files.get("postData");
+            if (jsonStr == null || jsonStr.isEmpty()) {
+                return newFixedLengthResponse(Response.Status.BAD_REQUEST, MIME_PLAINTEXT, "Données vides");
             }
 
-            // Group field for each items
-            // Key = "catId|itemId", Value = "name, min, max, img""
-            Map<String, Map<String, String>> itemDataCollector = new LinkedHashMap<>();
+            JSONObject fullJson = new JSONObject(jsonStr);
+            // Get items
+            JSONObject allFields = fullJson.getJSONObject("items");
+            // Get categories order
+            String[] orderedIds = fullJson.getString("cat_order_list").split(",");
 
-            for (String key : params.keySet()) {
-                if (key.startsWith("item|") || key.startsWith("new|")) {
-                    String[] parts = key.split("\\|"); // [type, catId, itemId, field]
-                    String catId = parts[1];
-                    String itemId = parts[2];
-                    String field = parts[3];
-                    List<String> values = params.get(key);
-                    String value = (values != null && !values.isEmpty()) ? values.get(0) : "";
-
-                    String fullId = catId + "|" + itemId;
-                    Map<String, String> itemFields = itemDataCollector.get(fullId);
-
-                    if (itemFields == null) {
-                        itemFields = new HashMap<>();
-                        itemDataCollector.put(fullId, itemFields);
-                    }
-
-                    itemFields.put(field, value);
-                }
-            }
-
-            for (Map.Entry<String, Map<String, String>> entry : itemDataCollector.entrySet()) {
-                String catId = entry.getKey().split("\\|")[0];
-                Map<String, String> fields = entry.getValue();
-
-                String name = fields.get("name");
-                if (name == null) name = "Sans nom";
-
-                String img = fields.get("img");
-                if (img == null) img = "";
-
-                int min = 0;
-                int max = 0;
-                try {
-                    String minStr = fields.get("min");
-                    if (minStr != null) min = Integer.parseInt(minStr);
-
-                    String maxStr = fields.get("max");
-                    if (maxStr != null) max = Integer.parseInt(maxStr);
-                } catch (Exception e) {
-                    // If error, keep 0
-                }
-
-                Item item = new Item(name, img, min, max);
-                List<Item> categoryItems = categoriesMap.get(catId);
-
-                if (categoryItems != null) {
-                    categoryItems.add(item);
-                }
-            }
-
-            // Stop to use cat ID and replace with cat name
+            // LinkedHashMap to keep order
             Map<String, List<Item>> finalData = new LinkedHashMap<>();
-            for (String catId : categoriesMap.keySet()) {
-                String realName = categoryNames.get(catId);
-                finalData.put(realName, categoriesMap.get(catId));
+
+            // For each category
+            for (String techId : orderedIds) {
+                // Create awaited label
+                String catNameKey = "cat|" + techId + "|name";
+                // Does it exist
+                if (!allFields.has(catNameKey)) continue;
+
+                // Get data
+                String realCatName = allFields.getString(catNameKey);
+                List<Item> itemsInCategory = new ArrayList<>();
+
+                // Browse and create items
+                int i = 0;
+                while (true) {
+                    String itemBase = "item|" + techId + "|" + i + "|";
+                    // On vérifie si l'item suivant existe (via son champ name)
+                    if (!allFields.has(itemBase + "name")) break;
+
+                    itemsInCategory.add(new Item(
+                        // Mandatory
+                        allFields.getString(itemBase + "name"),
+                        // Not mandatory
+                        allFields.optString(itemBase + "img", ""),
+                        parseSafely(allFields.optString(itemBase + "min", "0")),
+                        parseSafely(allFields.optString(itemBase + "max", "0"))
+                    ));
+                    i++;
+                }
+                finalData.put(realCatName, itemsInCategory);
             }
 
-            // Save data to disk in JSON format
             DataLoader.saveData(finalData);
-
-            return newFixedLengthResponse("✅ Catalogue enregistré ! <a href='/'>Retour</a>");
+            return newFixedLengthResponse(Response.Status.OK, MIME_PLAINTEXT, "OK");
 
         } catch (Exception e) {
-            Log.e("ControlServer", "Erreur lors de la sauvegarde", e);
-            return newFixedLengthResponse("❌ Erreur : " + e.getMessage());
+            Log.e("ControlServer", "Erreur save", e);
+            return newFixedLengthResponse(Response.Status.INTERNAL_ERROR, MIME_PLAINTEXT, "Erreur");
+        }
+    }
+
+    private int parseSafely(String val) {
+        if (val == null) return 0;
+        try {
+            return Integer.parseInt(val.trim());
+        } catch (Exception e) {
+            return 0;
         }
     }
 

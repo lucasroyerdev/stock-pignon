@@ -13,15 +13,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.ByteArrayOutputStream;
 
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Scanner;
-import java.util.Iterator;
 
 /**
  * Create a web server to remote management of app assets.
@@ -110,26 +107,31 @@ public class ControlServer extends NanoHTTPD {
      * Read from asset and return html file
      */
     private String fillEditor() {
-        // Get data for assets
+        // Get data from assets
         DataLoader.loadData();
         // Create an html string to fill the template
         StringBuilder html = new StringBuilder();
         // Save categories order
         List<String> orderList = new ArrayList<>();
+
+        // Globals
+        String globalId = "global";
+        Category globalCat = new Category("global", DataLoader.getGlobalItems());
+        html.append(renderCategorySection(globalId, globalCat));
+        orderList.add(globalId);
+
+        // Browser categories
         int index = 0;
+        for (Category cat : DataLoader.getCategories()) {
+            // cat_0, cat_1...
+            String techId = "cat_" + index;
 
-        // Browse map : 'id' for categories name, 'items' for items list
-        for (Map.Entry<String, List<Item>> section : DataLoader.getAllSections().entrySet()) {
-            String technicalId = "cat_" + index;
-            String displayName = section.getKey();
-            List<Item> items = section.getValue();
+            html.append(renderCategorySection(techId, cat));
+            orderList.add(techId);
 
-            orderList.add(technicalId);
-
-            // For each category, render a HTML card
-            html.append(renderCategorySection(technicalId, displayName, items));
             index++;
         }
+
         String orderField = "<input type='hidden' name='cat_order_list' value='" +
                 android.text.TextUtils.join(",", orderList) + "'>";
 
@@ -139,7 +141,9 @@ public class ControlServer extends NanoHTTPD {
     /**
      * Generate HTML section for each category
      */
-    private String renderCategorySection(String techId, String displayName, List<Item> items) {
+    private String renderCategorySection(String techId, Category cat) {
+        String displayName = cat.getName();
+        List<Item> items = cat.getItems();
         StringBuilder sb = new StringBuilder();
 
         sb.append("<div class='card'>");
@@ -147,19 +151,28 @@ public class ControlServer extends NanoHTTPD {
 
         if ("global".equals(displayName)) {
             sb.append("Articles globaux");
-            // Hidden input to mark cat for server
-            sb.append("<input type='hidden' name='cat|").append(displayName).append("|name' value='global'>");
+            sb.append("<input type='hidden' name='cat|global|name' value='global'>");
             techId = "global";
         } else {
-            // Copy H2 theme
-            sb.append("<input type='text' name='cat|").append(techId).append("|name' ")
-                    .append("value=\"").append(displayName).append("\" class='input-h2'>");
+            // Nom
+            sb.append("<input type='text' name='cat|").append(techId).append("|name' value=\"").append(displayName).append("\" class='input-h2'>");
 
-            // Delete category button
+            // Couleur de Fond (on utilise cat.getBgColor())
+            sb.append("<div style='display:inline-block; vertical-align:middle; margin-right:15px;'>");
+            sb.append("<div style='font-weight: bold; font-size: 0.7em; padding-bottom: 5px;'>Fond</div>");
+            sb.append("<input type='color' name='cat|").append(techId).append("|bgColor' value='").append(cat.getBgColor()).append("' style='width:30px; height:25px; border:none; cursor:pointer;'>");
+            sb.append("</div>");
+
+            // Couleur de Texte (on utilise cat.getTextColor())
+            sb.append("<div style='display:inline-block; vertical-align:middle; margin-right:15px;'>");
+            sb.append("<div style='font-weight: bold; font-size: 0.7em; padding-bottom: 5px;'>Texte</div>");
+            sb.append("<input type='color' name='cat|").append(techId).append("|textColor' value='").append(cat.getTextColor()).append("' style='width:30px; height:25px; border:none; cursor:pointer;'>");
+            sb.append("</div>");
+
+            // Bouton supprimer
             sb.append(" <button type='button' class='btn-del' style='vertical-align: middle; margin-left: 10px;' ")
-                    .append("onclick=\"if(confirm('Supprimer cette catégorie et tous ses articles?')) this.closest('.card').remove()\">×</button>");
+                    .append("onclick=\"if(confirm('Supprimer cette catégorie?')) this.closest('.card').remove()\">×</button>");
         }
-
         sb.append("</h2>");
 
         // Build table
@@ -236,18 +249,15 @@ public class ControlServer extends NanoHTTPD {
             // Get categories order
             String[] orderedIds = fullJson.getString("cat_order_list").split(",");
 
-            // LinkedHashMap to keep order
-            Map<String, List<Item>> finalData = new LinkedHashMap<>();
+            List<Category> finalData = new ArrayList<>(); 
 
             // For each category
             for (String techId : orderedIds) {
-                // Create awaited label
                 String catNameKey = "cat|" + techId + "|name";
                 // Does it exist
                 if (!allFields.has(catNameKey)) continue;
-
-                // Get data
-                String realCatName = allFields.getString(catNameKey);
+                
+                String name = allFields.getString(catNameKey);
                 List<Item> itemsInCategory = new ArrayList<>();
 
                 // Browse and create items
@@ -257,17 +267,38 @@ public class ControlServer extends NanoHTTPD {
                     // On vérifie si l'item suivant existe (via son champ name)
                     if (!allFields.has(itemBase + "name")) break;
 
+                    // Manage image
+                    String imgVal = allFields.optString(itemBase + "img", "");
+                    if (imgVal.startsWith("data:image")) {
+                        try {
+                            String newImgName = "img_" + System.currentTimeMillis() + "_" + i;
+                            String base64Data = imgVal.split(",")[1];
+                            byte[] decoded = android.util.Base64.decode(base64Data, android.util.Base64.DEFAULT);
+                            
+                            File imageFile = new File(imagesDir, newImgName + ".jpg");
+                            try (FileOutputStream fos = new FileOutputStream(imageFile)) {
+                                fos.write(decoded);
+                            }
+                            imgVal = newImgName; // Replace base64 with name of created jpg file
+                        } catch (Exception e) { Log.e("ControlServer", "Img Error", e); }
+                    }
+
                     itemsInCategory.add(new Item(
                         // Mandatory
                         allFields.getString(itemBase + "name"),
                         // Not mandatory
-                        allFields.optString(itemBase + "img", ""),
+                        imgVal,
                         parseSafely(allFields.optString(itemBase + "min", "0")),
                         parseSafely(allFields.optString(itemBase + "max", "0"))
                     ));
                     i++;
                 }
-                finalData.put(realCatName, itemsInCategory);
+
+                // Create category with items and colors
+                Category cat = new Category(name, itemsInCategory);
+                cat.setBgColor(allFields.optString("cat|" + techId + "|bgColor", "#0049AF"));
+                cat.setTextColor(allFields.optString("cat|" + techId + "|textColor", "#FFFFFF"));
+                finalData.add(cat);
             }
 
             DataLoader.saveData(finalData);

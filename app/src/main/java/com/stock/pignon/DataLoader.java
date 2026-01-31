@@ -102,6 +102,9 @@ public class DataLoader {
     public static List<Category> getCategories() {
         return cachedCategories;
     }
+    public static List<Item> getGlobalItems() {
+        return cachedGlobals;
+    }
 
     /**
      * Internal class for GSON
@@ -114,36 +117,30 @@ public class DataLoader {
     /**
      * Write JSON from online editor data
      */
-    public static void saveData(Map<String, List<Item>> sections) throws Exception {
-        File dir = new File(Environment.getExternalStorageDirectory(), EXTERNAL_DIR);
-        File jsonFile = new File(dir, PIECES_FILE);
-
-        // To respect original format, we use the same format as GSON
-        List<Item> globalList = sections.get("global");
-        if (globalList == null) {
-            globalList = new ArrayList<>();
-        }
-
+    public static void saveData(List<Category> categoriesList) throws Exception {
         CategoriesWrapper wrapper = new CategoriesWrapper();
-        wrapper.globalItems = globalList;
         wrapper.categories = new ArrayList<>();
+        wrapper.globalItems = new ArrayList<>();
 
-        // Fill each category
-        for (Map.Entry<String, List<Item>> entry : sections.entrySet()) {
-            if (!"global".equals(entry.getKey())) {
-                wrapper.categories.add(new Category(entry.getKey(), entry.getValue()));
+        // Browse category
+        for (Category cat : categoriesList) {
+            if ("global".equals(cat.getName())) {
+                wrapper.globalItems = cat.getItems();
+            } else {
+                wrapper.categories.add(cat);
             }
         }
 
-        // Convert to pretty JSON, human readable
+        // Create JSON
         Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
         String jsonString = gson.toJson(wrapper);
 
-        // Write to disk
-        try (FileOutputStream fos = new FileOutputStream(jsonFile);
-             OutputStreamWriter writer = new OutputStreamWriter(fos, "UTF-8")) {
+        File dir = new File(Environment.getExternalStorageDirectory(), Config.EXTERNAL_DIR_NAME);
+        File jsonFile = new File(dir, Config.INPUT_JSON_NAME);
+
+        // Write JSON
+        try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(jsonFile), "UTF-8")) {
             writer.write(jsonString);
-            writer.flush();
         }
 
         // Update app cache

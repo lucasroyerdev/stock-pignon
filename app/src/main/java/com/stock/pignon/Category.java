@@ -31,4 +31,8 @@ public class Category {
     public String getBgColor() { return bgColor; }
     public String getTextColor() { return textColor; }
     public List<Item> getItems() { return items != null ? items : new ArrayList<>(); }
+
+    // Setters
+    public void setBgColor(String bgColor) { this.bgColor = bgColor; }
+    public void setTextColor(String textColor) { this.textColor = textColor; }
 }

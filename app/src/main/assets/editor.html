@@ -155,7 +155,7 @@
             background: transparent !important;
             color: #555 !important;
             width: auto;
-            max-width: 70%;
+            max-width: 20%;
             border-bottom: 1px dashed #ccc !important;
             outline: none;
         }
@@ -175,10 +175,10 @@
 
         <div class="actions-bar">
             <button type="button" class="btn-back" onclick="window.location.href= '/'">← Retour </button>
-            <button type="button" class="btn-cancel" onclick="handleCancel(event)">✖ Tout annuler</button>
             <button type="button" class="btn-cat" onclick="addCategory()">+ Catégorie</button>
             <button type="button" onclick="sendData()" class="btn-save" style="position:static; transform:none;">💾
                 Enregistrer tout</button>
+            <button type="button" class="btn-cancel" onclick="handleCancel(event)">✖ Tout annuler</button>
         </div>
     </form>
 
@@ -187,24 +187,32 @@
             var t = document.getElementById('table-' + cat);
             var r = t.insertRow(-1);
             var id = Date.now();
-            r.innerHTML = '<td><input type="file" id="f_' + id + '" style="display:none" onchange="uImg(this)">' +
-                '<button type="button" class="link-mod" onclick="document.getElementById(\'f_' + id + '\').click()">Ajouter</button>' +
-                '<input type="hidden" name="new|' + cat + '|' + id + '|img" value=""></td>' +
+        
+            r.innerHTML = '<td>' +
+                '<img src="" class="img-p" onerror="this.src=\'https://placehold.co/60?text=?\'" style="display:block; margin-bottom:5px;">' +
+                '<input type="file" accept=".jpg,.png" style="font-size:10px; width:70px" onchange="uImg(this)">' +
+                '<input type="hidden" name="new|' + cat + '|' + id + '|img" value="">' + 
+                '</td>' +
                 '<td><input type="text" name="new|' + cat + '|' + id + '|name" placeholder="Nom..." required></td>' +
                 '<td><input type="number" name="new|' + cat + '|' + id + '|min" value="0" min="0" required></td>' +
                 '<td><input type="number" name="new|' + cat + '|' + id + '|max" value="0" min="0" required></td>' +
                 '<td><button type="button" class="btn-del" onclick="var l=this.parentNode.parentNode; l.parentNode.removeChild(l);">×</button></td>';
         }
 
-        function uImg(el) {
-            var f = el.files[0];
+        function uImg(element) {
+            var f = element.files[0];
             if (!f) return;
-            var row = el.parentNode.parentNode;
-            var id = f.name.split('.').slice(0, -1).join('.');
-            row.querySelector('input[type="hidden"]').value = id;
-            var fd = new FormData();
-            fd.append('images', f);
-            fetch('/upload_images', { method: 'POST', body: fd }).then(function () { alert('Image envoyée : ' + id); });
+            
+            var td = element.parentNode;
+            var imgTag = td.querySelector('.img-p');
+            var hiddenInput = td.querySelector('input[type="hidden"]');
+            
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                imgTag.src = e.target.result;
+                hiddenInput.value = e.target.result;
+            };
+            reader.readAsDataURL(f);
         }
 
         function handleCancel(e) {
@@ -229,6 +237,12 @@
             container.innerHTML =
                 '<h2>' +
                 '<input type="text" class="input-h2" name="cat|' + tempId + '|name" value="' + name + '">' +
+                '<div style="display:inline-block; vertical-align:middle; margin: 0 15px;">' +
+                '<small>Fond:</small><br><input type="color" name="cat|' + tempId + '|bgColor" value="#0049AF" style="width:30px; height:25px; border:none; cursor:pointer;">' +
+                '</div>' +
+                '<div style="display:inline-block; vertical-align:middle; margin-right:15px;">' +
+                '<small>Texte:</small><br><input type="color" name="cat|' + tempId + '|textColor" value="#FFFFFF" style="width:30px; height:25px; border:none; cursor:pointer;">' +
+                '</div>' +
                 ' <button type="button" class="btn-del" onclick="if(confirm(\'Supprimer cette catégorie ?\')) this.closest(\'.card\').remove()">×</button>' +
                 '</h2>' +
                 '<table id="table-' + tempId + '">' +
@@ -253,12 +267,17 @@
             // Browse showed categories
             const catOrder = [];
             document.querySelectorAll('.card').forEach((card, catIdx) => {
-                const catInput = card.querySelector('input[name^="cat|"]');
+                let techId = card.querySelector('input[name^="cat|"]')?.name.split('|')[1] || "c" + catIdx; // c0, c1 but avoid globals
+                catOrder.push(techId);
+
+                const catInput = card.querySelector('input[name$="|name"]');
+                const bgInput = card.querySelector('input[name$="|bgColor"]');
+                const textInput = card.querySelector('input[name$="|textColor"]');
                 if (!catInput) return;
 
-                const techId = "c" + catIdx; // c0, c1...
-                catOrder.push(techId);
                 data.items["cat|" + techId + "|name"] = catInput.value;
+                data.items["cat|" + techId + "|bgColor"] = bgInput ? bgInput.value : "#0049AF";
+                data.items["cat|" + techId + "|textColor"] = textInput ? textInput.value : "#FFFFFF";
 
                 // Browse each line
                 card.querySelectorAll('table tr').forEach((row, itemIdx) => {
